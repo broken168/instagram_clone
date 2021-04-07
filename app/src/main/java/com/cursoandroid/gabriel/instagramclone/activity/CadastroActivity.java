@@ -14,8 +14,6 @@ import com.cursoandroid.gabriel.instagramclone.R;
 import com.cursoandroid.gabriel.instagramclone.dto.NewUserDTO;
 import com.cursoandroid.gabriel.instagramclone.helper.MySharedPreferences;
 import com.cursoandroid.gabriel.instagramclone.model.AccountCredentials;
-import com.cursoandroid.gabriel.instagramclone.model.ModelToken;
-import com.cursoandroid.gabriel.instagramclone.model.Usuario;
 import com.cursoandroid.gabriel.instagramclone.services.AuthService;
 import com.google.android.material.textfield.TextInputEditText;
 

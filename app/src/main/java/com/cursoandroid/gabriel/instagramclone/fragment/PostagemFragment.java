@@ -143,8 +143,6 @@ public class PostagemFragment extends Fragment {
             try {
                 Bitmap imagem = null;
 
-
-
                 switch (requestCode) {
 
                     case SELECAO_CAMERA:
@@ -173,21 +171,4 @@ public class PostagemFragment extends Fragment {
         }
     }
 
-    public MultipartBody.Part getImage(Uri path){
-        File file = new File(getPath(path));
-        RequestBody requestFile =
-                RequestBody.create(MediaType.parse("multipart/form-data"), file);
-
-        // MultipartBody.Part is used to send also the actual file name
-        return MultipartBody.Part.createFormData("file", file.getName(), requestFile);
-
-    }
-
-    public String getPath(Uri uri) {
-        String[] projection = { MediaStore.Images.Media.DATA };
-        Cursor cursor = getActivity().managedQuery(uri, projection, null, null, null);
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        return cursor.getString(column_index);
-    }
 }

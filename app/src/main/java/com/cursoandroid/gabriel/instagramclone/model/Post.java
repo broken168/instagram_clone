@@ -5,10 +5,15 @@ import java.io.Serializable;
 public class Post implements Serializable {
 
     private String description, imageUrl;
-    private Long id, idUser;
+    private Long id, userProfileId;
 
     public Post() {
+    }
 
+    public Post(String description, String imageUrl, Long userProfileId) {
+        this.description = description;
+        this.imageUrl = imageUrl;
+        this.userProfileId = userProfileId;
     }
 
     public Long getId() {
@@ -19,12 +24,12 @@ public class Post implements Serializable {
         this.id = id;
     }
 
-    public Long getIdUser() {
-        return idUser;
+    public Long getUserProfileId() {
+        return userProfileId;
     }
 
-    public void setIdUser(Long idUser) {
-        this.idUser = idUser;
+    public void setUserProfileId(Long userProfileId) {
+        this.userProfileId = userProfileId;
     }
 
     public String getDescription() {

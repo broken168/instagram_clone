@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.cursoandroid.gabriel.instagramclone.R;
 import com.cursoandroid.gabriel.instagramclone.adapter.AdapterMiniaturas;
+import com.cursoandroid.gabriel.instagramclone.helper.Configurators;
 import com.cursoandroid.gabriel.instagramclone.helper.Converters;
 import com.cursoandroid.gabriel.instagramclone.helper.MySharedPreferences;
 import com.cursoandroid.gabriel.instagramclone.helper.RecyclerItemClickListener;
@@ -138,26 +139,26 @@ public class FiltroActivity extends AppCompatActivity {
     }
 
     private void getCurrentUser() {
+        Call<UserProfile> call = userServices.getCurrentUser();
+        call.enqueue(new Callback<UserProfile>() {
+            @Override
+            public void onResponse(Call<UserProfile> call, Response<UserProfile> response) {
+                if(response.isSuccessful()) currentUser = response.body();
+            }
+
+            @Override
+            public void onFailure(Call<UserProfile> call, Throwable t) {
+                Toast.makeText(FiltroActivity.this, "Failure: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void configRetrofit() {
-
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
-            @Override
-            public okhttp3.Response intercept(Chain chain) throws IOException {
-                Request newRequest  = chain.request().newBuilder()
-                        .addHeader("Authorization", new MySharedPreferences(FiltroActivity.this).getToken())
-                        .build();
-                return chain.proceed(newRequest);
-            }
-        }).build();
-        retrofit = new Retrofit.Builder().baseUrl("http://189.84.65.150:8080").client(client).addConverterFactory(GsonConverterFactory.create()).build();
+        retrofit = Configurators.retrofitConfigurator(getApplicationContext());
         fileService = retrofit.create(FileService.class);
         postService = retrofit.create(PostService.class);
         userServices = retrofit.create(UserServices.class);
     }
-
-
 
     public void recuperarFiltros(){
          ThumbnailsManager.clearThumbs();
@@ -188,17 +189,14 @@ public class FiltroActivity extends AppCompatActivity {
         dialog.show();
 
         if(textDescricao.getText() != null) {
+            Bitmap bmImage = ((BitmapDrawable) imagefotoEscolhida.getDrawable()).getBitmap();
 
-            Bitmap bmImage = ((BitmapDrawable)imagefotoEscolhida.getDrawable()).getBitmap();
-
-            /*
-            Call<PathModel> call = fileService.uploadFile(Converters.converterBitmapToMultipartBody(bmImage), "post_image");
-
-            call.enqueue(new Callback<PathModel>() {
+            Call<Void> call = fileService.uploadFile(Converters.converterBitmapToMultipartBody(bmImage), "post_image");
+            call.enqueue(new Callback<Void>() {
                 @Override
-                public void onResponse(Call<PathModel> call, Response<PathModel> response) {
-                    if(response.isSuccessful() && response.body() != null){
-                        createPost(response.body());
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    if(response.isSuccessful()){
+                        createPost(response.headers().get("Location"));
                     }else{
                         Toast.makeText(FiltroActivity.this, Converters.converterErrorBodyToString(response), Toast.LENGTH_SHORT).show();
                         dialog.dismiss();
@@ -206,13 +204,10 @@ public class FiltroActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onFailure(Call<PathModel> call, Throwable t) {
+                public void onFailure(Call<Void> call, Throwable t) {
 
                 }
             });
-
-             */
-
         }else{
             Toast.makeText(this, "A postagem precisa de uma legenda", Toast.LENGTH_SHORT).show();
         }
@@ -220,27 +215,19 @@ public class FiltroActivity extends AppCompatActivity {
 
     }
 
-    private void createPost() {
-        Post post = new Post();
-        post.setDescription(textDescricao.getText().toString());
-        //post.setImageUrl(body.getPath());
-
-        Call<Post> call = postService.createPost(post);
-        call.enqueue(new Callback<Post>() {
+    private void createPost(String path) {
+        Post post = new Post(textDescricao.getText().toString(), path, currentUser.getId());
+        Call<Void> call = postService.createPost(post);
+        call.enqueue(new Callback<Void>() {
             @Override
-            public void onResponse(Call<Post> call, Response<Post> response) {
-                if(response.isSuccessful() && response.body() != null){
-                    Toast.makeText(FiltroActivity.this, "Post publicado com sucesso", Toast.LENGTH_SHORT).show();
-                    finish();
-                }else {
-                    Toast.makeText(FiltroActivity.this, Converters.converterErrorBodyToString(response), Toast.LENGTH_SHORT).show();
-                    finish();
-                }
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if(response.isSuccessful()) Toast.makeText(FiltroActivity.this, "Post publicado com sucesso", Toast.LENGTH_SHORT).show();
+                else Toast.makeText(FiltroActivity.this, Converters.converterErrorBodyToString(response), Toast.LENGTH_SHORT).show();
 
+                finish();
             }
-
             @Override
-            public void onFailure(Call<Post> call, Throwable t) {
+            public void onFailure(Call<Void> call, Throwable t) {
                 Toast.makeText(FiltroActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
                 finish();
             }
@@ -269,10 +256,8 @@ public class FiltroActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
-        switch (item.getItemId()){
-            case R.id.ic_salvar_postagem:
-                publishPostPhoto();
-                break;
+        if (item.getItemId() == R.id.ic_salvar_postagem) {
+            publishPostPhoto();
         }
 
         return super.onOptionsItemSelected(item);

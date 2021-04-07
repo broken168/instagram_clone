@@ -11,9 +11,7 @@ import retrofit2.http.POST;
 
 public interface PostService {
 
-    @POST(value = "/api/createPost")
-    Call<Post> createPost(@Body Post post);
+    @POST(value = "/posts")
+    Call<Void> createPost(@Body Post post);
 
-    @GET(value = "/api/getAllPosts")
-    Call<List<Post>> getAllPosts();
 }

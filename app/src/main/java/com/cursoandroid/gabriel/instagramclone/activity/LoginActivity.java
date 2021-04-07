@@ -13,11 +13,10 @@ import android.widget.Toast;
 import com.cursoandroid.gabriel.instagramclone.R;
 import com.cursoandroid.gabriel.instagramclone.helper.MySharedPreferences;
 import com.cursoandroid.gabriel.instagramclone.model.AccountCredentials;
-import com.cursoandroid.gabriel.instagramclone.model.ModelToken;
+
 import com.cursoandroid.gabriel.instagramclone.services.AuthService;
 import com.google.android.material.textfield.TextInputEditText;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import dmax.dialog.SpotsDialog;

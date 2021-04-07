@@ -58,7 +58,7 @@ public class AdapterFeed extends RecyclerView.Adapter<AdapterFeed.MyViewHolder> 
         new ImageDownloader(holder.postImage).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, post.getImageUrl());
         holder.description.setText(post.getDescription());
 
-        Call<UserProfile> callUser = userServices.getUserProfileById(post.getIdUser());
+        Call<UserProfile> callUser = userServices.getUserProfileById(post.getUserProfileId());
         callUser.enqueue(new Callback<UserProfile>() {
             @Override
             public void onResponse(Call<UserProfile> call, Response<UserProfile> response) {
