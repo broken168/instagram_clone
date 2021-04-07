@@ -105,31 +105,12 @@ public class FeedFragment extends Fragment {
     }
 
     private void configRetrofit() {
-        retrofit = Configurators.configurerRetrofit(getActivity());
+        retrofit = Configurators.retrofitConfigurator(getActivity());
         postService = retrofit.create(PostService.class);
     }
 
     private void listarFeed(){
 
-        listPost.clear();
-        Call<List<Post>> call = postService.getAllPosts();
-        call.enqueue(new Callback<List<Post>>() {
-            @Override
-            public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
-                if(response.isSuccessful() && response.body() != null){
-                    listPost.addAll(response.body());
-                    adapterFeed.notifyDataSetChanged();
-                }else{
-                    Toast.makeText(getActivity(), Converters.converterErrorBodyToString(response), Toast.LENGTH_SHORT).show();
-                }
-
-            }
-
-            @Override
-            public void onFailure(Call<List<Post>> call, Throwable t) {
-                Toast.makeText(getActivity(), t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     @Override

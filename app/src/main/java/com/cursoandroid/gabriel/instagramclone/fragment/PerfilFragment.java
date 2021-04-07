@@ -1,14 +1,11 @@
 package com.cursoandroid.gabriel.instagramclone.fragment;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,10 +18,10 @@ import android.widget.Toast;
 
 import com.cursoandroid.gabriel.instagramclone.R;
 import com.cursoandroid.gabriel.instagramclone.activity.EditarPerfilActivity;
+import com.cursoandroid.gabriel.instagramclone.activity.LoginActivity;
 import com.cursoandroid.gabriel.instagramclone.adapter.AdapterGrid;
 import com.cursoandroid.gabriel.instagramclone.helper.Configurators;
 import com.cursoandroid.gabriel.instagramclone.helper.ImageDownloader;
-import com.cursoandroid.gabriel.instagramclone.helper.MySharedPreferences;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
 import com.cursoandroid.gabriel.instagramclone.services.FileService;
 import com.cursoandroid.gabriel.instagramclone.services.UserServices;
@@ -32,25 +29,19 @@ import com.nostra13.universalimageloader.cache.disc.naming.HashCodeFileNameGener
 import com.nostra13.universalimageloader.cache.memory.impl.LruMemoryCache;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-import com.nostra13.universalimageloader.core.assist.FlushedInputStream;
 
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.util.List;
 import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -67,8 +58,6 @@ public class PerfilFragment extends Fragment {
 
     private Retrofit retrofit;
     private UserServices userServices;
-    private FileService fileService;
-
     private UserProfile currentUser;
 
     private ProgressBar progressBarImagePerfil;
@@ -123,7 +112,6 @@ public class PerfilFragment extends Fragment {
         configRetrofit();
 
         carregarInformacoesUsuario();
-        inicializarImageLoader();
         carregarFotosPostagem();
 
 
@@ -138,9 +126,8 @@ public class PerfilFragment extends Fragment {
     }
 
     private void configRetrofit() {
-        retrofit = Configurators.configurerRetrofit(getActivity());
+        retrofit = Configurators.retrofitConfigurator(getActivity());
         userServices = retrofit.create(UserServices.class);
-        fileService = retrofit.create(FileService.class);
     }
 
     public void inicializarComponentes(View view){
@@ -161,49 +148,50 @@ public class PerfilFragment extends Fragment {
                 .diskCacheSize(50 * 1024 * 1024)
                 .diskCacheFileCount(100)
                 .diskCacheFileNameGenerator(new HashCodeFileNameGenerator()).build();
-        ImageLoader.getInstance().init(config);
+
+        if(!ImageLoader.getInstance().isInited()) ImageLoader.getInstance().init(config);
     }
 
     public void carregarFotosPostagem(){
 
+
+
     }
     public void carregarInformacoesUsuario(){
-
-        Call<UserProfile> call = userServices.getUserProfileById(MySharedPreferences.getCurrentUserID(Objects.requireNonNull(getActivity())));
-
+        Call<UserProfile> call = userServices.getCurrentUser();
         call.enqueue(new Callback<UserProfile>() {
             @Override
             public void onResponse(Call<UserProfile> call, Response<UserProfile> response) {
-                if(response.isSuccessful() && response.body() != null){
+                if(response.isSuccessful()){
                     currentUser = response.body();
                     loadUserData();
                 }else{
+                    progressBarImagePerfil.setVisibility(View.GONE);
                     try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Toast.makeText(getActivity(), jObjError.getString("message"), Toast.LENGTH_LONG).show();
+                        JSONObject json = new JSONObject(response.errorBody().string());
+                        Toast.makeText(getActivity(), json.getString("details"), Toast.LENGTH_SHORT).show();
                     } catch (Exception e) {
                         Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
             }
-
             @Override
             public void onFailure(Call<UserProfile> call, Throwable t) {
-                Toast.makeText(getActivity(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Failure: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
-
     }
 
     private void loadUserData() {
-        if(currentUser.getPostagens() != null && currentUser.getSeguindo() != null && currentUser.getSeguidores() != null){
-            textPublicacoes.setText(String.valueOf(currentUser.getPostagens()));
-            textSeguidores.setText(String.valueOf(currentUser.getSeguidores()));
-            textSeguindo.setText(String.valueOf(currentUser.getSeguindo()));
-        }
+        List<Long> followers = currentUser.getFollowers();
+        List<Long> following = currentUser.getFollowing();
+        Long postsNumber = currentUser.getPostsNumber();
+        if(followers != null) textSeguidores.setText(String.valueOf(followers.size()));
+        if(following != null) textSeguindo.setText(String.valueOf(following.size()));
+        if(postsNumber != null) textSeguindo.setText(String.valueOf(postsNumber));
 
-        String url = currentUser.getProfileImage_path_name();
-        if(url != null){
+        String url = currentUser.getImageUrl();
+        if(url != null && !url.equals("")){
             new ImageDownloader(imgPerfil, progressBarImagePerfil).execute(url);
         }else{
             progressBarImagePerfil.setVisibility(View.GONE);
@@ -211,7 +199,12 @@ public class PerfilFragment extends Fragment {
 
     }
 
-
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        inicializarImageLoader();
+        Log.d(TAG, "onActivityCreated: criadaaaaa");
+    }
 
     @Override
     public void onStop() {
@@ -221,6 +214,5 @@ public class PerfilFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-
     }
 }

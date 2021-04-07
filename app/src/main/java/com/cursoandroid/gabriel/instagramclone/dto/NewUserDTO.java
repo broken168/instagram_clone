@@ -1,12 +1,17 @@
-package com.cursoandroid.gabriel.instagramclone.model;
+package com.cursoandroid.gabriel.instagramclone.dto;
 
-public class AccountCredentials{
+public class NewUserDTO {
 
     private String email;
+    private String username;
     private String password;
 
-    public AccountCredentials(String email, String password) {
+    public NewUserDTO() {
+    }
+
+    public NewUserDTO(String email, String username, String password) {
         this.email = email;
+        this.username = username;
         this.password = password;
     }
 
@@ -16,6 +21,14 @@ public class AccountCredentials{
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getPassword() {

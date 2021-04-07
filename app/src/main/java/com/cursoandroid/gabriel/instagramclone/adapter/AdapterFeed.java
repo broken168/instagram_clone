@@ -64,9 +64,9 @@ public class AdapterFeed extends RecyclerView.Adapter<AdapterFeed.MyViewHolder> 
             public void onResponse(Call<UserProfile> call, Response<UserProfile> response) {
                 if(response.isSuccessful() && response.body() != null){
                     holder.name.setText(response.body().getUsername());
-                    if(response.body().getProfileImage_path_name() != null) {
-                        new ImageDownloader(holder.profilePhoto).execute(response.body().getProfileImage_path_name());
-                    }
+                    //if(response.body().getProfileImage_path_name() != null) {
+                     //   new ImageDownloader(holder.profilePhoto).execute(response.body().getProfileImage_path_name());
+                    //}
                 }else{
                     Toast.makeText(context, Converters.converterErrorBodyToString(response), Toast.LENGTH_SHORT).show();
                 }

@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -16,6 +17,7 @@ import com.cursoandroid.gabriel.instagramclone.model.ModelToken;
 import com.cursoandroid.gabriel.instagramclone.services.AuthService;
 import com.google.android.material.textfield.TextInputEditText;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import dmax.dialog.SpotsDialog;
@@ -33,12 +35,12 @@ public class LoginActivity extends AppCompatActivity {
     private static final Retrofit retrofit = new Retrofit.Builder().baseUrl("http://189.84.65.150:8080").addConverterFactory(GsonConverterFactory.create()).build();
     private static final AuthService authService = retrofit.create(AuthService.class);
     private AlertDialog dialog;
+    private MySharedPreferences mySharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
 
 
         inicializarComponentes();
@@ -60,7 +62,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void verificarUsuarioLogado(){
-        String tokenRecuperado = MySharedPreferences.getToken(getApplicationContext());
+        String tokenRecuperado = mySharedPreferences.getToken();
         if(!tokenRecuperado.equals("")){
             finish();
             startActivity(new Intent(LoginActivity.this, MainActivity.class));
@@ -72,10 +74,10 @@ public class LoginActivity extends AppCompatActivity {
         editEmail = findViewById(R.id.editEmailLogin);
         editSenha = findViewById(R.id.editSenhaLogin);
         editEmail.requestFocus();
+        mySharedPreferences = new MySharedPreferences(this);
     }
 
     public void abrirCadastro(View view){
-
         startActivity(new Intent(LoginActivity.this, CadastroActivity.class));
     }
     public void validarUsuario(){
@@ -94,36 +96,31 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void logarUsuario(AccountCredentials accountCredentials) {
-
         dialog.show();
 
-        Call<ModelToken> call = authService.loginUsuario(accountCredentials);
-
-        call.enqueue(new Callback<ModelToken>() {
+        Call<Void> call = authService.loginUsuario(accountCredentials);
+        call.enqueue(new Callback<Void>() {
             @Override
-            public void onResponse(Call<ModelToken> call, Response<ModelToken> response) {
-
-                if (response.isSuccessful()) {
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful() && response.headers().get("Authorization") != null) {
                     // Do your success stuff...
-                    MySharedPreferences.saveToken(getApplicationContext(), response.body().getToken());
-                    MySharedPreferences.saveCurrentUserID(getApplicationContext(), response.body().getId());
-                    if(!MySharedPreferences.getToken(getApplicationContext()).equals("")) {
+                    mySharedPreferences.saveToken(response.headers().get("Authorization"));
+                    if(!mySharedPreferences.getToken().equals("")) {
                         finish();
                         startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     }
                 } else {
                     try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Toast.makeText(LoginActivity.this, jObjError.getString("message"), Toast.LENGTH_LONG).show();
+                        JSONObject json = new JSONObject(response.errorBody().string());
+                        Toast.makeText(LoginActivity.this, json.getString("details"), Toast.LENGTH_SHORT).show();
                     } catch (Exception e) {
                         Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
                 dialog.dismiss();
             }
-
             @Override
-            public void onFailure(Call<ModelToken> call, Throwable t) {
+            public void onFailure(Call<Void> call, Throwable t) {
                 Toast.makeText(LoginActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
             }

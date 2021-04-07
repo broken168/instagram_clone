@@ -11,12 +11,15 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.cursoandroid.gabriel.instagramclone.R;
+import com.cursoandroid.gabriel.instagramclone.dto.NewUserDTO;
 import com.cursoandroid.gabriel.instagramclone.helper.MySharedPreferences;
+import com.cursoandroid.gabriel.instagramclone.model.AccountCredentials;
 import com.cursoandroid.gabriel.instagramclone.model.ModelToken;
 import com.cursoandroid.gabriel.instagramclone.model.Usuario;
 import com.cursoandroid.gabriel.instagramclone.services.AuthService;
 import com.google.android.material.textfield.TextInputEditText;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import dmax.dialog.SpotsDialog;
@@ -30,7 +33,6 @@ public class CadastroActivity extends AppCompatActivity {
 
     private TextInputEditText email, nome, senha;
     private Button buttonCadastrar;
-    private Usuario usuario;
     private AlertDialog dialog;
     private Retrofit retrofit;
     private AuthService authService;
@@ -80,11 +82,8 @@ public class CadastroActivity extends AppCompatActivity {
 
         if(!nomeCadastro.isEmpty() && !senhaCadastro.isEmpty() && !emailCadastro.isEmpty()){
 
-            usuario = new Usuario();
-            usuario.setFullName(nomeCadastro);
-            usuario.setEmail(emailCadastro);
-            usuario.setPassword(senhaCadastro);
-            cadastrarUsuario(usuario);
+            NewUserDTO user = new NewUserDTO(emailCadastro, nomeCadastro, senhaCadastro);
+            cadastrarUsuario(user);
 
         }else{
             Toast.makeText(CadastroActivity.this, "Preencha todos os dados", Toast.LENGTH_SHORT).show();
@@ -92,11 +91,10 @@ public class CadastroActivity extends AppCompatActivity {
     }
 
     //cadastrar o usuario no firebase
-    public void cadastrarUsuario(Usuario usuario){
+    public void cadastrarUsuario(NewUserDTO user){
         dialog.show();
 
-        Call<Void> call = authService.registrarUsuario(usuario);
-
+        Call<Void> call = authService.registrarUsuario(user);
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response){
@@ -104,23 +102,49 @@ public class CadastroActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     // Do your success stuff...
                     Toast.makeText(CadastroActivity.this, "Cadastro feito com sucesso", Toast.LENGTH_SHORT).show();
-                    /*
-                    mySharedPreferences.salvarToken(response.body().getToken());
-                    if(!mySharedPreferences.recuperarToken().equals("")) {
-                        finish();
-                        startActivity(new Intent(CadastroActivity.this, MainActivity.class));
-                    }
-
-                     */
+                    autoLogin(user);
                 } else {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Toast.makeText(CadastroActivity.this, jObjError.getString("message"), Toast.LENGTH_LONG).show();
+                        JSONArray jsonArray = jObjError.getJSONArray("errors");
+                        for(int i=0; i < jsonArray.length(); i++) {
+                            Toast.makeText(CadastroActivity.this, jsonArray.getJSONObject(i).getString("message"), Toast.LENGTH_SHORT).show();
+                        }
                     } catch (Exception e) {
                         Toast.makeText(CadastroActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
                 dialog.dismiss();
+            }
+
+            private void autoLogin(NewUserDTO user) {
+                Call<Void> call = authService.loginUsuario(new AccountCredentials(user.getEmail(), user.getPassword()));
+                call.enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if (response.isSuccessful() && response.headers().get("Authorization") != null) {
+                            // Do your success stuff...
+                            mySharedPreferences.saveToken(response.headers().get("Authorization"));
+                            if(!mySharedPreferences.getToken().equals("")) {
+                                finish();
+                                startActivity(new Intent(CadastroActivity.this, MainActivity.class));
+                            }
+                        } else {
+                            try {
+                                JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                Toast.makeText(CadastroActivity.this, jObjError.getJSONObject("errors").getString("details"), Toast.LENGTH_SHORT).show();
+                            } catch (Exception e) {
+                                Toast.makeText(CadastroActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Toast.makeText(CadastroActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+
             }
 
             @Override
@@ -130,6 +154,7 @@ public class CadastroActivity extends AppCompatActivity {
                 dialog.dismiss();
             }
         });
+
 
     }
 

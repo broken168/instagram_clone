@@ -58,69 +58,6 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.viewPager, new FeedFragment()).commit();
 
-        String token = MySharedPreferences.getToken(getApplicationContext());
-        if(!token.isEmpty() ) {
-            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
-                @Override
-                public okhttp3.Response intercept(Chain chain) throws IOException {
-                    Request newRequest  = chain.request().newBuilder()
-                            .addHeader("Authorization", "Bearer " + MySharedPreferences.getToken(getApplicationContext()))
-                            .build();
-                    return chain.proceed(newRequest);
-                }
-            }).build();
-            Retrofit retrofit = new Retrofit.Builder().baseUrl("http://189.84.65.150:8080").client(client).addConverterFactory(GsonConverterFactory.create()).build();
-            UserServices authService = retrofit.create(UserServices.class);
-
-            Call<UserProfile> call = authService.getUserProfileById(MySharedPreferences.getCurrentUserID(getApplicationContext()));
-
-            call.enqueue(new Callback<UserProfile>() {
-                @Override
-                public void onResponse(Call<UserProfile> call, Response<UserProfile> response) {
-                    if (response.isSuccessful()) {
-                        String username = response.body().getUsername();
-                        if (username == null) {
-                            android.app.AlertDialog dialog = new AlertDialog.Builder(MainActivity.this, R.style.AlertDialogCustom)
-                                    .setTitle("Oops... Problemas!")
-                                    .setMessage("Para usar o aplicativo é necessário configurar o seu perfil")
-                                    .setCancelable(false)
-                                    .setPositiveButton("Vamos lá!", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            Intent i = new Intent(MainActivity.this, EditarPerfilActivity.class);
-                                            i.putExtra("openByDialog", true);
-                                            startActivity(i);
-                                            finish();
-                                        }
-                                    })
-                                    .setNegativeButton("Fechar app", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            finish();
-                                        }
-                                    }).create();
-                            dialog.show();
-                        }
-
-                    }else{
-                        try {
-                            JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            Toast.makeText(MainActivity.this, jObjError.getString("message"), Toast.LENGTH_LONG).show();
-                        } catch (Exception e) {
-                            Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-                        }
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<UserProfile> call, Throwable t) {
-                    Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-
-     
-
     }
 
     private void configurarBottomNavigationView(){
@@ -180,7 +117,6 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
     private void deslogarUsuario(){
-        MySharedPreferences.removeToken(getApplicationContext());
-        MySharedPreferences.removeCurrentUserID(getApplicationContext());
+        new MySharedPreferences(this).removeToken();
     }
 }

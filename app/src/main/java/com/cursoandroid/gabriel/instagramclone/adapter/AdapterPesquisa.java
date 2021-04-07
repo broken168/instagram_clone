@@ -49,9 +49,12 @@ public class AdapterPesquisa extends RecyclerView.Adapter<AdapterPesquisa.MyView
         UserProfile user = userList.get(position);
         holder.nome.setText(user.getUsername());
 
+        /*
         if(user.getProfileImage_path_name() != null) {
             new DownloadImage(holder.foto).execute(user.getProfileImage_path_name());
         }
+
+         */
 
     }
 

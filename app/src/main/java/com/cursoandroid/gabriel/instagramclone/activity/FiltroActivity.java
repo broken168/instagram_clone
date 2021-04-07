@@ -24,7 +24,6 @@ import com.cursoandroid.gabriel.instagramclone.adapter.AdapterMiniaturas;
 import com.cursoandroid.gabriel.instagramclone.helper.Converters;
 import com.cursoandroid.gabriel.instagramclone.helper.MySharedPreferences;
 import com.cursoandroid.gabriel.instagramclone.helper.RecyclerItemClickListener;
-import com.cursoandroid.gabriel.instagramclone.model.PathModel;
 import com.cursoandroid.gabriel.instagramclone.model.Post;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
 import com.cursoandroid.gabriel.instagramclone.services.FileService;
@@ -139,24 +138,6 @@ public class FiltroActivity extends AppCompatActivity {
     }
 
     private void getCurrentUser() {
-        Call<UserProfile> call = userServices.getUserProfileById(MySharedPreferences.getCurrentUserID(getApplicationContext()));
-        call.enqueue(new Callback<UserProfile>() {
-            @Override
-            public void onResponse(Call<UserProfile> call, Response<UserProfile> response) {
-                if(response.isSuccessful() && response.body() != null){
-                    currentUser = response.body();
-                    dialogCurrentUser.dismiss();
-                }else{
-                    Toast.makeText(FiltroActivity.this, "Erro ao recuperar dados do usuário. Tente novamente.", Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<UserProfile> call, Throwable t) {
-
-            }
-        });
     }
 
     private void configRetrofit() {
@@ -165,7 +146,7 @@ public class FiltroActivity extends AppCompatActivity {
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {
                 Request newRequest  = chain.request().newBuilder()
-                        .addHeader("Authorization", "Bearer " + MySharedPreferences.getToken(getApplicationContext()))
+                        .addHeader("Authorization", new MySharedPreferences(FiltroActivity.this).getToken())
                         .build();
                 return chain.proceed(newRequest);
             }
@@ -210,7 +191,7 @@ public class FiltroActivity extends AppCompatActivity {
 
             Bitmap bmImage = ((BitmapDrawable)imagefotoEscolhida.getDrawable()).getBitmap();
 
-
+            /*
             Call<PathModel> call = fileService.uploadFile(Converters.converterBitmapToMultipartBody(bmImage), "post_image");
 
             call.enqueue(new Callback<PathModel>() {
@@ -230,16 +211,19 @@ public class FiltroActivity extends AppCompatActivity {
                 }
             });
 
+             */
+
         }else{
             Toast.makeText(this, "A postagem precisa de uma legenda", Toast.LENGTH_SHORT).show();
         }
+
+
     }
 
-    private void createPost(PathModel body) {
+    private void createPost() {
         Post post = new Post();
         post.setDescription(textDescricao.getText().toString());
-        post.setImageUrl(body.getPath());
-        post.setIdUser(MySharedPreferences.getCurrentUserID(getApplicationContext()));
+        //post.setImageUrl(body.getPath());
 
         Call<Post> call = postService.createPost(post);
         call.enqueue(new Callback<Post>() {

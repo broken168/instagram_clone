@@ -12,12 +12,12 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Configurators {
 
-    public static Retrofit configurerRetrofit(Context context){
+    public static Retrofit retrofitConfigurator(Context context){
         OkHttpClient client = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {
                 Request newRequest  = chain.request().newBuilder()
-                        .addHeader("Authorization", "Bearer " + MySharedPreferences.getToken(context))
+                        .addHeader("Authorization", new MySharedPreferences(context).getToken())
                         .build();
                 return chain.proceed(newRequest);
             }

@@ -156,7 +156,7 @@ public class PesquisaFragment extends Fragment {
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {
                 Request newRequest  = chain.request().newBuilder()
-                        .addHeader("Authorization", "Bearer " + MySharedPreferences.getToken(Objects.requireNonNull(getActivity())))
+                        .addHeader("Authorization", new MySharedPreferences(getActivity()).getToken())
                         .build();
                 return chain.proceed(newRequest);
             }
@@ -175,9 +175,7 @@ public class PesquisaFragment extends Fragment {
                 if(response.isSuccessful() && response.body() != null){
                     List<UserProfile> list = response.body();
                     for(UserProfile userProfile : response.body()){
-                        if(userProfile.getIdUser() != MySharedPreferences.getCurrentUserID(Objects.requireNonNull(getActivity()))) {
-                            listaUsuarios.add(userProfile);
-                        }
+
                     }
                     listaUsuarios = response.body();
                     adapterPesquisa.notifyDataSetChanged();

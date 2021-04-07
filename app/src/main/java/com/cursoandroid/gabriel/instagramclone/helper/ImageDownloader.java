@@ -43,8 +43,8 @@ public class ImageDownloader extends AsyncTask<String, Void, Bitmap>{
             //URL myURL = new URL("http://i.stack.imgur.com/WxVXe.jpg");
             HttpURLConnection connection = (HttpURLConnection) myURL.openConnection();
 
-            String userCredentials = "gabrielm@gabriel.municipiodigital.com.br:,z[V;Dku*3Jv";
-            String basicAuth = "Basic " + new String(Base64.encode(userCredentials.getBytes(), 0));
+            String userCredentials = "gabrigov.instagram_clone@gabriel.govmail.com.br:cRfENlDB=REh";
+            String basicAuth = "Basic " + new String(Base64.encode(userCredentials.getBytes(), Base64.NO_WRAP));
 
             connection.setRequestProperty("Authorization", basicAuth);
             connection.setDoInput(true);
@@ -65,14 +65,11 @@ public class ImageDownloader extends AsyncTask<String, Void, Bitmap>{
 
     @Override
     protected void onPostExecute(Bitmap bmp) {
-        if(image != null){
-            image.setImageBitmap(bmp);
-        }else{
-            circleImage.setImageBitmap(bmp);
-        }
-        if(progressBar != null){
-            progressBar.setVisibility(View.GONE);
-        }
+        if(image != null) image.setImageBitmap(bmp);
+        else circleImage.setImageBitmap(bmp);
+
+        if(progressBar != null) progressBar.setVisibility(View.GONE);
+
     }
 
 }

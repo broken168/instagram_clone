@@ -1,38 +1,37 @@
 package com.cursoandroid.gabriel.instagramclone.model;
 
+import java.util.List;
+
 public class UserProfile {
 
-    public UserProfile() {
-    }
-
-    private Long idUser;
-
+    private Long id;
     private String email;
-
-    private String profileImage_path_name;
-
     private String username;
+    private String imageUrl;
+    private List<Long> followers;
+    private List<Long> following;
+    private Long postsNumber;
 
-    private Long seguidores;
+    public UserProfile() {
 
-    private Long seguindo;
-
-    private Long postagens;
-
-    public Long getIdUser() {
-        return idUser;
     }
 
-    public void setIdUser(Long idUser) {
-        this.idUser = idUser;
+    public UserProfile(Long id, String email, String username, String imageUrl, List<Long> followers, List<Long> following, Long postsNumber) {
+        this.id = id;
+        this.email = email;
+        this.username = username;
+        this.imageUrl = imageUrl;
+        this.followers = followers;
+        this.following = following;
+        this.postsNumber = postsNumber;
     }
 
-    public String getProfileImage_path_name() {
-        return profileImage_path_name;
+    public Long getId() {
+        return id;
     }
 
-    public void setProfileImage_path_name(String profileImage_path_name) {
-        this.profileImage_path_name = profileImage_path_name;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getEmail() {
@@ -51,27 +50,35 @@ public class UserProfile {
         this.username = username;
     }
 
-    public Long getSeguidores() {
-        return seguidores;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
-    public void setSeguidores(Long seguidores) {
-        this.seguidores = seguidores;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
-    public Long getSeguindo() {
-        return seguindo;
+    public List<Long> getFollowers() {
+        return followers;
     }
 
-    public void setSeguindo(Long seguindo) {
-        this.seguindo = seguindo;
+    public void setFollowers(List<Long> followers) {
+        this.followers = followers;
     }
 
-    public Long getPostagens() {
-        return postagens;
+    public List<Long> getFollowing() {
+        return following;
     }
 
-    public void setPostagens(Long postagens) {
-        this.postagens = postagens;
+    public void setFollowing(List<Long> following) {
+        this.following = following;
+    }
+
+    public Long getPostsNumber() {
+        return postsNumber;
+    }
+
+    public void setPostsNumber(Long postsNumber) {
+        this.postsNumber = postsNumber;
     }
 }
