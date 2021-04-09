@@ -20,9 +20,9 @@ import android.widget.Toast;
 import com.cursoandroid.gabriel.instagramclone.R;
 import com.cursoandroid.gabriel.instagramclone.helper.Converters;
 import com.cursoandroid.gabriel.instagramclone.helper.Dialog;
-import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloader;
 import com.cursoandroid.gabriel.instagramclone.helper.MySharedPreferences;
 import com.cursoandroid.gabriel.instagramclone.helper.Permissao;
+import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
 import com.cursoandroid.gabriel.instagramclone.services.FileService;
 import com.cursoandroid.gabriel.instagramclone.services.UserServices;
@@ -155,7 +155,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
 
         String url = currentUser.getImageUrl();
         if(url != null && !url.equals("")) {
-            new ImageDownloader(imageEditarPerfil, progressBarImagePerfil).execute(url);
+            ImageDownloaderGlide.downloadImage(url, this, progressBarImagePerfil, imageEditarPerfil);
         }else {
             progressBarImagePerfil.setVisibility(View.GONE);
         }

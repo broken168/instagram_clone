@@ -1,22 +1,16 @@
 package com.cursoandroid.gabriel.instagramclone.fragment;
 
-
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import android.util.Base64;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-
 import com.cursoandroid.gabriel.instagramclone.R;
 import com.cursoandroid.gabriel.instagramclone.adapter.AdapterFeed;
 import com.cursoandroid.gabriel.instagramclone.helper.Configurators;
@@ -26,22 +20,15 @@ import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
 import com.cursoandroid.gabriel.instagramclone.search.PostSearch;
 import com.cursoandroid.gabriel.instagramclone.services.PostService;
 import com.cursoandroid.gabriel.instagramclone.services.UserServices;
-import com.nostra13.universalimageloader.core.assist.FlushedInputStream;
-
 import org.json.JSONObject;
-
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
-
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-
 
 /**
  * A simple {@link Fragment} subclass.
@@ -55,7 +42,6 @@ public class FeedFragment extends Fragment {
     private AdapterFeed adapterFeed;
 
     private List<Post> postList = new ArrayList<>();
-    private List<Post> postListUser = new ArrayList<>();
 
     private Retrofit retrofit;
     private PostService postService;
@@ -172,12 +158,20 @@ public class FeedFragment extends Fragment {
 
         Call<PostSearch> call = userServices.getPostsByIds(ids);
         call.enqueue(new Callback<PostSearch>() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onResponse(Call<PostSearch> call, Response<PostSearch> response) {
                 if(response.isSuccessful()){
                     for (UserProfile user : response.body().getContent()){
-                        new ImageDownloaderFeed().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, user);
+                        for(Post post : user.getPosts()){
+                            post.setUsername(user.getUsername());
+                            post.setUserImageUrl(user.getImageUrl());
+                            postList.add(post);
+                        }
                     }
+                    Collections.sort(postList, Comparator.comparing(Post::getId));
+                    adapterFeed.notifyDataSetChanged();
+
                 }
                 else {
                     try {
@@ -196,48 +190,6 @@ public class FeedFragment extends Fragment {
         });
     }
 
-    private class ImageDownloaderFeed extends AsyncTask<UserProfile, Void, UserProfile> {
-
-        @Override
-        protected UserProfile doInBackground(UserProfile... userProfiles) {
-
-            try {
-                UserProfile user = userProfiles[0];
-                URL myURL = new URL(user.getImageUrl());
-                //URL myURL = new URL("http://i.stack.imgur.com/WxVXe.jpg");
-                HttpURLConnection connection = (HttpURLConnection) myURL.openConnection();
-
-                String userCredentials = "gabrigov.instagram_clone@gabriel.govmail.com.br:cRfENlDB=REh";
-                String basicAuth = "Basic " + new String(Base64.encode(userCredentials.getBytes(), Base64.NO_WRAP));
-
-                connection.setRequestProperty("Authorization", basicAuth);
-                connection.setDoInput(true);
-                connection.setDoOutput(false);
-                connection.setRequestMethod("GET");
-                connection.connect();
-
-                Log.d("result", "doInBackground: " + connection.getResponseCode());
-                InputStream is = connection.getInputStream();
-                Bitmap bmp = BitmapFactory.decodeStream(new FlushedInputStream(is));
-                connection.disconnect();
-                user.setImageBitmap(bmp);
-                return user;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(UserProfile user) {
-            for(Post post : user.getPosts()){
-                post.setUsername(user.getUsername());
-                post.setUserImageBitmap(user.getImageBitmap());
-                postList.add(post);
-            }
-            adapterFeed.notifyDataSetChanged();
-        }
-    }
 
     @Override
     public void onStart() {

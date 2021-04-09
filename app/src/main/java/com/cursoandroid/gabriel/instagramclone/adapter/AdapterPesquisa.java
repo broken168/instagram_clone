@@ -1,7 +1,6 @@
 package com.cursoandroid.gabriel.instagramclone.adapter;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cursoandroid.gabriel.instagramclone.R;
-import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloader;
+import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
 
 import java.util.List;
@@ -41,10 +40,8 @@ public class AdapterPesquisa extends RecyclerView.Adapter<AdapterPesquisa.MyView
 
         UserProfile user = userList.get(position);
         holder.nome.setText(user.getUsername());
-
-
         if(user.getImageUrl() != null) {
-            new ImageDownloader(holder.foto).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, user.getImageUrl());
+            ImageDownloaderGlide.downloadImage(user.getImageUrl(), context, holder.foto);
         }
 
     }

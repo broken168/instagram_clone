@@ -13,7 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cursoandroid.gabriel.instagramclone.R;
-import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloader;
+import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
 import com.cursoandroid.gabriel.instagramclone.model.Post;
 import com.cursoandroid.gabriel.instagramclone.services.UserServices;
 import com.like.LikeButton;
@@ -49,10 +49,10 @@ public class AdapterFeed extends RecyclerView.Adapter<AdapterFeed.MyViewHolder> 
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
 
         Post post = listPost.get(position);
-        new ImageDownloader(holder.postImage).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, post.getImageUrl());
+
+        ImageDownloaderGlide.downloadImage(post.getImageUrl(), context, holder.postImage);
         holder.name.setText(post.getUsername());
-        if (post.getUserImageBitmap() != null )holder.profilePhoto.setImageBitmap(post.getUserImageBitmap());
-        holder.description.setText(post.getDescription());
+        if (post.getUserImageUrl() != null ) ImageDownloaderGlide.downloadImage(post.getUserImageUrl(), context, holder.profilePhoto);        holder.description.setText(post.getDescription());
 
 
     }

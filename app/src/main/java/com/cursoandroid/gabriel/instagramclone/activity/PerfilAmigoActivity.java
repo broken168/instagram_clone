@@ -18,7 +18,7 @@ import com.cursoandroid.gabriel.instagramclone.R;
 import com.cursoandroid.gabriel.instagramclone.adapter.AdapterGrid;
 import com.cursoandroid.gabriel.instagramclone.helper.Configurators;
 import com.cursoandroid.gabriel.instagramclone.helper.Dialog;
-import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloader;
+import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
 import com.cursoandroid.gabriel.instagramclone.model.Post;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
 import com.cursoandroid.gabriel.instagramclone.services.UserServices;
@@ -266,7 +266,7 @@ public class PerfilAmigoActivity extends AppCompatActivity {
 
                 String url = friendUser.getImageUrl();
                 if(url != null && !url.equals("")){
-                    new ImageDownloader(imagemPerfil, progressBar).execute(url);
+                    ImageDownloaderGlide.downloadImage(url, getApplicationContext(), progressBar, imagemPerfil);
                 }else{
                     progressBar.setVisibility(View.GONE);
                 }

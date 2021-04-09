@@ -23,7 +23,7 @@ public interface UserServices {
     @PUT(value = "/users/update")
     Call<Void> updateInfosUser(@Body UserProfile user);
 
-    @GET(value = "/users/findByUsername/{username}")
+    @GET(value = "/users/username/{username}")
     Call<UserSearch> getUserProfileByUsername(@Path("username")String username);
 
     @GET(value = "/users/current_user")

@@ -1,11 +1,13 @@
 package com.cursoandroid.gabriel.instagramclone.fragment;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,13 +17,12 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.cursoandroid.gabriel.instagramclone.R;
 import com.cursoandroid.gabriel.instagramclone.activity.EditarPerfilActivity;
 import com.cursoandroid.gabriel.instagramclone.adapter.AdapterGrid;
 import com.cursoandroid.gabriel.instagramclone.helper.Configurators;
 import com.cursoandroid.gabriel.instagramclone.helper.Dialog;
-import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloader;
+import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
 import com.cursoandroid.gabriel.instagramclone.services.UserServices;
 import com.nostra13.universalimageloader.cache.disc.naming.HashCodeFileNameGenerator;
@@ -113,7 +114,6 @@ public class PerfilFragment extends Fragment {
         carregarInformacoesUsuario();
         carregarFotosPostagem();
 
-
         buttonEditarPerfil.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -191,7 +191,7 @@ public class PerfilFragment extends Fragment {
 
         String url = currentUser.getImageUrl();
         if(url != null && !url.equals("")){
-            new ImageDownloader(imgPerfil, progressBarImagePerfil).execute(url);
+            ImageDownloaderGlide.downloadImage(url, getActivity(), progressBarImagePerfil, imgPerfil);
         }else{
             progressBarImagePerfil.setVisibility(View.GONE);
         }
