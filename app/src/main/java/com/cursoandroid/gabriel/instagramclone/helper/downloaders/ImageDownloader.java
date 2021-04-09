@@ -1,4 +1,4 @@
-package com.cursoandroid.gabriel.instagramclone.helper;
+package com.cursoandroid.gabriel.instagramclone.helper.downloaders;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

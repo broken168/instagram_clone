@@ -1,16 +1,21 @@
 package com.cursoandroid.gabriel.instagramclone.model;
 
+import android.graphics.Bitmap;
+
+import java.io.Serializable;
 import java.util.List;
 
-public class UserProfile {
+public class UserProfile implements Serializable {
 
     private Long id;
     private String email;
+    private Bitmap imageBitmap;
     private String username;
     private String imageUrl;
     private List<Long> followers;
     private List<Long> following;
     private Long postsNumber;
+    private List<Post> posts;
 
     public UserProfile() {
 
@@ -24,6 +29,14 @@ public class UserProfile {
         this.followers = followers;
         this.following = following;
         this.postsNumber = postsNumber;
+    }
+
+    public Bitmap getImageBitmap() {
+        return imageBitmap;
+    }
+
+    public void setImageBitmap(Bitmap imageBitmap) {
+        this.imageBitmap = imageBitmap;
     }
 
     public Long getId() {
@@ -80,5 +93,13 @@ public class UserProfile {
 
     public void setPostsNumber(Long postsNumber) {
         this.postsNumber = postsNumber;
+    }
+
+    public List<Post> getPosts() {
+        return posts;
+    }
+
+    public void setPosts(List<Post> posts) {
+        this.posts = posts;
     }
 }

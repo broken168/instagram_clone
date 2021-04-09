@@ -8,25 +8,19 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cursoandroid.gabriel.instagramclone.R;
-import com.cursoandroid.gabriel.instagramclone.helper.Converters;
-import com.cursoandroid.gabriel.instagramclone.helper.ImageDownloader;
+import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloader;
 import com.cursoandroid.gabriel.instagramclone.model.Post;
-import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
 import com.cursoandroid.gabriel.instagramclone.services.UserServices;
 import com.like.LikeButton;
 
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class AdapterFeed extends RecyclerView.Adapter<AdapterFeed.MyViewHolder> {
@@ -56,26 +50,11 @@ public class AdapterFeed extends RecyclerView.Adapter<AdapterFeed.MyViewHolder> 
 
         Post post = listPost.get(position);
         new ImageDownloader(holder.postImage).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, post.getImageUrl());
+        holder.name.setText(post.getUsername());
+        if (post.getUserImageBitmap() != null )holder.profilePhoto.setImageBitmap(post.getUserImageBitmap());
         holder.description.setText(post.getDescription());
 
-        Call<UserProfile> callUser = userServices.getUserProfileById(post.getUserProfileId());
-        callUser.enqueue(new Callback<UserProfile>() {
-            @Override
-            public void onResponse(Call<UserProfile> call, Response<UserProfile> response) {
-                if(response.isSuccessful() && response.body() != null){
-                    holder.name.setText(response.body().getUsername());
-                    //if(response.body().getProfileImage_path_name() != null) {
-                     //   new ImageDownloader(holder.profilePhoto).execute(response.body().getProfileImage_path_name());
-                    //}
-                }else{
-                    Toast.makeText(context, Converters.converterErrorBodyToString(response), Toast.LENGTH_SHORT).show();
-                }
-            }
-            @Override
-            public void onFailure(Call<UserProfile> call, Throwable t) {
-                Toast.makeText(context, "Failure: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+
     }
 
     @Override

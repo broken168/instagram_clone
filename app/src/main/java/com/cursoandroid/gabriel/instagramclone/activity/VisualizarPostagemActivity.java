@@ -3,15 +3,12 @@ package com.cursoandroid.gabriel.instagramclone.activity;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.cursoandroid.gabriel.instagramclone.R;
 import com.cursoandroid.gabriel.instagramclone.model.Post;
-import com.cursoandroid.gabriel.instagramclone.model.Usuario;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -38,7 +35,6 @@ public class VisualizarPostagemActivity extends AppCompatActivity {
         Bundle bundle = getIntent().getExtras();
         if(bundle != null){
             Post postagem = (Post) bundle.getSerializable("postagem");
-            Usuario usuario = (Usuario) bundle.getSerializable("usuario");
 
 
             /*

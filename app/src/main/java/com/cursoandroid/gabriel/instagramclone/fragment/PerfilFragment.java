@@ -18,12 +18,11 @@ import android.widget.Toast;
 
 import com.cursoandroid.gabriel.instagramclone.R;
 import com.cursoandroid.gabriel.instagramclone.activity.EditarPerfilActivity;
-import com.cursoandroid.gabriel.instagramclone.activity.LoginActivity;
 import com.cursoandroid.gabriel.instagramclone.adapter.AdapterGrid;
 import com.cursoandroid.gabriel.instagramclone.helper.Configurators;
-import com.cursoandroid.gabriel.instagramclone.helper.ImageDownloader;
+import com.cursoandroid.gabriel.instagramclone.helper.Dialog;
+import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloader;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
-import com.cursoandroid.gabriel.instagramclone.services.FileService;
 import com.cursoandroid.gabriel.instagramclone.services.UserServices;
 import com.nostra13.universalimageloader.cache.disc.naming.HashCodeFileNameGenerator;
 import com.nostra13.universalimageloader.cache.memory.impl.LruMemoryCache;
@@ -169,7 +168,7 @@ public class PerfilFragment extends Fragment {
                     progressBarImagePerfil.setVisibility(View.GONE);
                     try {
                         JSONObject json = new JSONObject(response.errorBody().string());
-                        Toast.makeText(getActivity(), json.getString("details"), Toast.LENGTH_SHORT).show();
+                        Dialog.dialogError(getActivity(), json.getString("message"), json.getString("details"));
                     } catch (Exception e) {
                         Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
                     }

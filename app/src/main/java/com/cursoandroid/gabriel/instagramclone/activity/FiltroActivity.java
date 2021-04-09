@@ -23,6 +23,7 @@ import com.cursoandroid.gabriel.instagramclone.R;
 import com.cursoandroid.gabriel.instagramclone.adapter.AdapterMiniaturas;
 import com.cursoandroid.gabriel.instagramclone.helper.Configurators;
 import com.cursoandroid.gabriel.instagramclone.helper.Converters;
+import com.cursoandroid.gabriel.instagramclone.helper.Dialog;
 import com.cursoandroid.gabriel.instagramclone.helper.MySharedPreferences;
 import com.cursoandroid.gabriel.instagramclone.helper.RecyclerItemClickListener;
 import com.cursoandroid.gabriel.instagramclone.model.Post;
@@ -35,6 +36,8 @@ import com.zomato.photofilters.FilterPack;
 import com.zomato.photofilters.imageprocessors.Filter;
 import com.zomato.photofilters.utils.ThumbnailItem;
 import com.zomato.photofilters.utils.ThumbnailsManager;
+
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -144,6 +147,14 @@ public class FiltroActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<UserProfile> call, Response<UserProfile> response) {
                 if(response.isSuccessful()) currentUser = response.body();
+                else{
+                    try{
+                        JSONObject json = new JSONObject(response.errorBody().string());
+                        Dialog.dialogError(FiltroActivity.this, json.getString("message"), json.getString("details"));
+                    }catch (Exception e){
+                        Toast.makeText(FiltroActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                }
             }
 
             @Override
@@ -198,14 +209,19 @@ public class FiltroActivity extends AppCompatActivity {
                     if(response.isSuccessful()){
                         createPost(response.headers().get("Location"));
                     }else{
-                        Toast.makeText(FiltroActivity.this, Converters.converterErrorBodyToString(response), Toast.LENGTH_SHORT).show();
+                        try{
+                        JSONObject json = new JSONObject(response.errorBody().string());
+                        Dialog.dialogError(FiltroActivity.this, json.getString("message"), json.getString("details"));
+                        }catch (Exception e){
+                            Toast.makeText(FiltroActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                        }
                         dialog.dismiss();
                     }
                 }
 
                 @Override
                 public void onFailure(Call<Void> call, Throwable t) {
-
+                    Toast.makeText(FiltroActivity.this, "Failure: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
         }else{
@@ -216,26 +232,29 @@ public class FiltroActivity extends AppCompatActivity {
     }
 
     private void createPost(String path) {
-        Post post = new Post(textDescricao.getText().toString(), path, currentUser.getId());
+        Post post = new Post(textDescricao.getText().toString(), path, currentUser);
         Call<Void> call = postService.createPost(post);
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if(response.isSuccessful()) Toast.makeText(FiltroActivity.this, "Post publicado com sucesso", Toast.LENGTH_SHORT).show();
-                else Toast.makeText(FiltroActivity.this, Converters.converterErrorBodyToString(response), Toast.LENGTH_SHORT).show();
-
+                else {
+                    try {
+                        JSONObject json = new JSONObject(response.errorBody().string());
+                        Dialog.dialogError(FiltroActivity.this, json.getString("message"), json.getString("details"));
+                    }catch (Exception e){
+                        Toast.makeText(FiltroActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }
                 finish();
             }
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                Toast.makeText(FiltroActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(FiltroActivity.this, "Failure: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 finish();
             }
         });
     }
-
-
-
 
     public void inicializarComponentes(){
         imagefotoEscolhida = findViewById(R.id.imageFotoEscolhida);

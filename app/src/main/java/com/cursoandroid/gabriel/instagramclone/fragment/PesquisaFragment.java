@@ -17,28 +17,22 @@ import android.widget.Toast;
 import com.cursoandroid.gabriel.instagramclone.R;
 import com.cursoandroid.gabriel.instagramclone.activity.PerfilAmigoActivity;
 import com.cursoandroid.gabriel.instagramclone.adapter.AdapterPesquisa;
-import com.cursoandroid.gabriel.instagramclone.helper.MySharedPreferences;
+import com.cursoandroid.gabriel.instagramclone.helper.Configurators;
+import com.cursoandroid.gabriel.instagramclone.helper.Dialog;
 import com.cursoandroid.gabriel.instagramclone.helper.RecyclerItemClickListener;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
-import com.cursoandroid.gabriel.instagramclone.model.Usuario;
-import com.cursoandroid.gabriel.instagramclone.services.FileService;
+import com.cursoandroid.gabriel.instagramclone.search.UserSearch;
 import com.cursoandroid.gabriel.instagramclone.services.UserServices;
 
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -57,9 +51,11 @@ public class PesquisaFragment extends Fragment {
     private Retrofit retrofit;
     private UserServices userServices;
 
+    private UserProfile currentUser;
 
     private List<UserProfile> listaUsuarios = new ArrayList<>();
     private AdapterPesquisa adapterPesquisa;
+    private UserSearch userSearch;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -108,6 +104,7 @@ public class PesquisaFragment extends Fragment {
         recyclerViewPesquisar.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         configRetrofit();
+        getCurrentUser();
 
         adapterPesquisa = new AdapterPesquisa(listaUsuarios, getActivity());
 
@@ -118,7 +115,7 @@ public class PesquisaFragment extends Fragment {
             public void onItemClick(View view, int position) {
                 //Usuario usuario = listaUsuarios.get(position);
                 Intent i = new Intent(getActivity(), PerfilAmigoActivity.class);
-                i.putExtra("usuarioSelecionado", "usuario");
+                i.putExtra("user", listaUsuarios.get(position).getId());
                 startActivity(i);
             }
 
@@ -147,42 +144,54 @@ public class PesquisaFragment extends Fragment {
                 return false;
             }
         });
-
         return view;
     }
 
-    private void configRetrofit() {
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
+    private void getCurrentUser() {
+        Call<UserProfile> call = userServices.getCurrentUser();
+        call.enqueue(new Callback<UserProfile>() {
             @Override
-            public okhttp3.Response intercept(Chain chain) throws IOException {
-                Request newRequest  = chain.request().newBuilder()
-                        .addHeader("Authorization", new MySharedPreferences(getActivity()).getToken())
-                        .build();
-                return chain.proceed(newRequest);
+            public void onResponse(Call<UserProfile> call, Response<UserProfile> response) {
+                if(response.isSuccessful()){
+                    currentUser = response.body();
+                }else{
+                    try {
+                        JSONObject json = new JSONObject(response.errorBody().string());
+                        Dialog.dialogError(getActivity(), json.getString("message"), json.getString("details"));
+                    } catch (Exception e) {
+                        Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                }
             }
-        }).build();
-        retrofit = new Retrofit.Builder().baseUrl("http://189.84.65.150:8080").client(client).addConverterFactory(GsonConverterFactory.create()).build();
+            @Override
+            public void onFailure(Call<UserProfile> call, Throwable t) {
+                Toast.makeText(getActivity(), "Failure: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void configRetrofit() {
+        retrofit = Configurators.retrofitConfigurator(getActivity());
         userServices = retrofit.create(UserServices.class);
     }
+
     private void pesquisarUsuarios(String username){
 
         listaUsuarios.clear();
 
-        Call<List<UserProfile>> call = userServices.getUserProfileByUsername(username);
-        call.enqueue(new Callback<List<UserProfile>>() {
+        Call<UserSearch> call = userServices.getUserProfileByUsername(username);
+        call.enqueue(new Callback<UserSearch>() {
             @Override
-            public void onResponse(Call<List<UserProfile>> call, Response<List<UserProfile>> response) {
-                if(response.isSuccessful() && response.body() != null){
-                    List<UserProfile> list = response.body();
-                    for(UserProfile userProfile : response.body()){
-
-                    }
-                    listaUsuarios = response.body();
+            public void onResponse(Call<UserSearch> call, Response<UserSearch> response) {
+                if(response.isSuccessful()){
+                    userSearch = response.body();
+                    listaUsuarios.addAll(response.body().getContent());
+                    listaUsuarios.remove(currentUser);
                     adapterPesquisa.notifyDataSetChanged();
                 }else{
                     try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Toast.makeText(getActivity(), jObjError.getString("message"), Toast.LENGTH_LONG).show();
+                        JSONObject json = new JSONObject(response.errorBody().string());
+                        Dialog.dialogError(getContext(), json.getString("message"), json.getString("details"));
                     } catch (Exception e) {
                         Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
                     }
@@ -191,7 +200,7 @@ public class PesquisaFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<List<UserProfile>> call, Throwable t) {
+            public void onFailure(Call<UserSearch> call, Throwable t) {
                 Toast.makeText(getActivity(), "Erro ao fazer pesquisa. " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });

@@ -1,6 +1,5 @@
 package com.cursoandroid.gabriel.instagramclone.activity;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,11 +14,9 @@ import com.cursoandroid.gabriel.instagramclone.R;
 import com.cursoandroid.gabriel.instagramclone.adapter.AdapterComentarios;
 import com.cursoandroid.gabriel.instagramclone.model.Comentario;
 import com.cursoandroid.gabriel.instagramclone.model.Feed;
-import com.cursoandroid.gabriel.instagramclone.model.Usuario;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class VisualizarComentariosActivity extends AppCompatActivity {

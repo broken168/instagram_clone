@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.cursoandroid.gabriel.instagramclone.R;
 import com.cursoandroid.gabriel.instagramclone.dto.NewUserDTO;
+import com.cursoandroid.gabriel.instagramclone.helper.Dialog;
 import com.cursoandroid.gabriel.instagramclone.helper.MySharedPreferences;
 import com.cursoandroid.gabriel.instagramclone.model.AccountCredentials;
 import com.cursoandroid.gabriel.instagramclone.services.AuthService;
@@ -48,6 +49,8 @@ public class CadastroActivity extends AppCompatActivity {
                 .setMessage("Cadastrando...")
                 .setCancelable(false)
                 .build();
+
+
 
         retrofit = new Retrofit.Builder().baseUrl("http://189.84.65.150:8080").addConverterFactory(GsonConverterFactory.create()).build();
         authService = retrofit.create(AuthService.class);
@@ -105,9 +108,7 @@ public class CadastroActivity extends AppCompatActivity {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
                         JSONArray jsonArray = jObjError.getJSONArray("errors");
-                        for(int i=0; i < jsonArray.length(); i++) {
-                            Toast.makeText(CadastroActivity.this, jsonArray.getJSONObject(i).getString("message"), Toast.LENGTH_SHORT).show();
-                        }
+                        Dialog.dialogError(CadastroActivity.this, jsonArray.getJSONObject(0).getString("message"), null);
                     } catch (Exception e) {
                         Toast.makeText(CadastroActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
                     }
@@ -129,8 +130,8 @@ public class CadastroActivity extends AppCompatActivity {
                             }
                         } else {
                             try {
-                                JSONObject jObjError = new JSONObject(response.errorBody().string());
-                                Toast.makeText(CadastroActivity.this, jObjError.getJSONObject("errors").getString("details"), Toast.LENGTH_SHORT).show();
+                                JSONObject json = new JSONObject(response.errorBody().string());
+                                Dialog.dialogError(CadastroActivity.this, json.getString("message"), json.getString("details"));
                             } catch (Exception e) {
                                 Toast.makeText(CadastroActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
                             }
@@ -148,16 +149,10 @@ public class CadastroActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 Log.d("kkkk", "onResponse: error");
-                Toast.makeText(CadastroActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(CadastroActivity.this, "Failure: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
             }
         });
-
-
     }
-
-
-
-
 
 }

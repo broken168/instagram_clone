@@ -19,7 +19,8 @@ import android.widget.Toast;
 
 import com.cursoandroid.gabriel.instagramclone.R;
 import com.cursoandroid.gabriel.instagramclone.helper.Converters;
-import com.cursoandroid.gabriel.instagramclone.helper.ImageDownloader;
+import com.cursoandroid.gabriel.instagramclone.helper.Dialog;
+import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloader;
 import com.cursoandroid.gabriel.instagramclone.helper.MySharedPreferences;
 import com.cursoandroid.gabriel.instagramclone.helper.Permissao;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
@@ -134,7 +135,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
                     progressBarImagePerfil.setVisibility(View.GONE);
                     try {
                         JSONObject json = new JSONObject(response.errorBody().string());
-                        Toast.makeText(EditarPerfilActivity.this, json.getString("details"), Toast.LENGTH_SHORT).show();
+                        Dialog.dialogError(EditarPerfilActivity.this, json.getString("message"), json.getString("details"));
                     } catch (Exception e) {
                         Toast.makeText(EditarPerfilActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
                     }
@@ -209,6 +210,13 @@ public class EditarPerfilActivity extends AppCompatActivity {
                     if(response.isSuccessful()){
                         currentUser.setImageUrl(response.headers().get("Location"));
                         updateUserInfos();
+                    }else{
+                        try {
+                            JSONObject json = new JSONObject(response.errorBody().string());
+                            Dialog.dialogError(getApplicationContext(), json.getString("message"), json.getString("details"));
+                        }catch (Exception e){
+                            Toast.makeText(EditarPerfilActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
 
@@ -233,25 +241,22 @@ public class EditarPerfilActivity extends AppCompatActivity {
                     Toast.makeText(EditarPerfilActivity.this, "Infos atualizadas com sucesso!", Toast.LENGTH_SHORT).show();
                 }else{
                     try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Toast.makeText(EditarPerfilActivity.this, jObjError.getString("message"), Toast.LENGTH_LONG).show();
+                        JSONObject json = new JSONObject(response.errorBody().string());
+                        Dialog.dialogError(EditarPerfilActivity.this, json.getString("message"), json.getString("details"));
                     } catch (Exception e) {
                         Toast.makeText(EditarPerfilActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
-                if(openByDialog){
-                    finish();
-                    startActivity(new Intent(EditarPerfilActivity.this, MainActivity.class));
-                }else {
-                    finish();
-                }
-                dialog.dismiss();
+                close();
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 Toast.makeText(EditarPerfilActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
-                dialog.dismiss();
+                close();
+
+            }
+            private void close() {
                 if(openByDialog){
                     finish();
                     startActivity(new Intent(EditarPerfilActivity.this, MainActivity.class));

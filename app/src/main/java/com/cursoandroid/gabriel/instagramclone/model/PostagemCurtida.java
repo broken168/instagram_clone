@@ -4,7 +4,6 @@ public class PostagemCurtida {
 
     public int qtdCurtida = 0;
     public Feed feed;
-    public Usuario usuario;
 
     public PostagemCurtida() {
     }
@@ -35,11 +34,4 @@ public class PostagemCurtida {
         this.feed = feed;
     }
 
-    public Usuario getUsuario() {
-        return usuario;
-    }
-
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
-    }
 }

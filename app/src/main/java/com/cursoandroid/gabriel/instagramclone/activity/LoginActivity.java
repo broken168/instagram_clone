@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.cursoandroid.gabriel.instagramclone.R;
+import com.cursoandroid.gabriel.instagramclone.helper.Dialog;
 import com.cursoandroid.gabriel.instagramclone.helper.MySharedPreferences;
 import com.cursoandroid.gabriel.instagramclone.model.AccountCredentials;
 
@@ -111,7 +112,7 @@ public class LoginActivity extends AppCompatActivity {
                 } else {
                     try {
                         JSONObject json = new JSONObject(response.errorBody().string());
-                        Toast.makeText(LoginActivity.this, json.getString("details"), Toast.LENGTH_SHORT).show();
+                        Dialog.dialogError(LoginActivity.this, json.getString("message"), json.getString("details"));
                     } catch (Exception e) {
                         Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
                     }
