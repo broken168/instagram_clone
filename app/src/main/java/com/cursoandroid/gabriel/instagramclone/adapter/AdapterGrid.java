@@ -14,12 +14,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.cursoandroid.gabriel.instagramclone.R;
+import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
 
 
 public class AdapterGrid extends ArrayAdapter<String> {
@@ -27,12 +30,19 @@ public class AdapterGrid extends ArrayAdapter<String> {
     private Context context;
     private int layoutResource;
     private List<String> urlFotos;
+    private DisplayImageOptions displayImageOptions;
 
     public AdapterGrid(@NonNull Context context, int resource, @NonNull List<String> objects) {
         super(context, resource, objects);
         this.context = context;
         this.layoutResource = resource;
         this.urlFotos = objects;
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", ImageDownloaderGlide.BASIC_AUTH);
+
+        displayImageOptions = new DisplayImageOptions.Builder()
+                .extraForDownloader(headers)
+                .build();
     }
 
     public class ViewHolder{
@@ -56,30 +66,7 @@ public class AdapterGrid extends ArrayAdapter<String> {
             viewHolder= (ViewHolder) convertView.getTag();
         }
         String urlImagem = getItem(position);
-        ImageLoader imageLoader = ImageLoader.getInstance();
-        imageLoader.displayImage(urlImagem, viewHolder.imagem, new ImageLoadingListener() {
-            @Override
-            public void onLoadingStarted(String imageUri, View view) {
-                viewHolder.progressBar.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
-                viewHolder.progressBar.setVisibility(View.GONE);
-                viewHolder.imagem.setImageResource(R.drawable.avatar);
-            }
-
-            @Override
-            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                viewHolder.progressBar.setVisibility(View.GONE);
-
-            }
-
-            @Override
-            public void onLoadingCancelled(String imageUri, View view) {
-                viewHolder.progressBar.setVisibility(View.GONE);
-            }
-        });
+        ImageDownloaderGlide.downloadImage(urlImagem, context, viewHolder.progressBar, viewHolder.imagem);
 
         return convertView;
     }

@@ -1,11 +1,16 @@
 package com.cursoandroid.gabriel.instagramclone.activity;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
@@ -21,16 +26,15 @@ import com.cursoandroid.gabriel.instagramclone.helper.Dialog;
 import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
 import com.cursoandroid.gabriel.instagramclone.model.Post;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
+import com.cursoandroid.gabriel.instagramclone.search.PostSearch;
 import com.cursoandroid.gabriel.instagramclone.services.UserServices;
-import com.nostra13.universalimageloader.cache.disc.naming.HashCodeFileNameGenerator;
-import com.nostra13.universalimageloader.cache.memory.impl.LruMemoryCache;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -40,7 +44,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-public class PerfilAmigoActivity extends AppCompatActivity {
+public class PerfilAmigoActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
     private TextView textButtonAcaoPerfil;
     private CircleImageView imagemPerfil;
@@ -91,9 +95,6 @@ public class PerfilAmigoActivity extends AppCompatActivity {
             retrieveUser(bundle.getLong("user"));
         }
 
-        carregarFotosPostagem();
-        inicializarImageLoader();
-
         buttonAcaoPerfil.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -112,6 +113,7 @@ public class PerfilAmigoActivity extends AppCompatActivity {
         });
     }
 
+
     private void configRetrofit() {
         retrofit = Configurators.retrofitConfigurator(this);
         userServices = retrofit.create(UserServices.class);
@@ -129,18 +131,51 @@ public class PerfilAmigoActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBarEditarPerfil);
     }
 
-    public void inicializarImageLoader(){
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this)
-                .memoryCache(new LruMemoryCache(2 * 1024 * 1024))
-                .memoryCacheSize(2 * 1024 * 1024)
-                .diskCacheSize(50 * 1024 * 1024)
-                .diskCacheFileCount(100)
-                .diskCacheFileNameGenerator(new HashCodeFileNameGenerator()).build();
-        ImageLoader.getInstance().init(config);
+    public void carregarFotosPostagem(){
+
+        int tamanhoGrid = getResources().getDisplayMetrics().widthPixels;
+        int tamanhoImagem = tamanhoGrid / 3;
+        gridViewPerfil.setColumnWidth( tamanhoImagem );
+
+        Call<PostSearch> call = userServices.getPostsByIds(friendUser.getId().toString());
+        call.enqueue(new Callback<PostSearch>() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
+            @Override
+            public void onResponse(Call<PostSearch> call, Response<PostSearch> response) {
+
+                if(response.isSuccessful()){
+
+                    List<Post> postList = response.body().getContent().get(0).getPosts();
+                    Collections.sort(postList, Comparator.comparing(Post::getId).reversed());
+                    List<String> imagesUrl = new ArrayList<>();
+                    for(Post post : postList) {
+                        imagesUrl.add(post.getImageUrl());
+                    }
+
+                    textPublicacoes.setText(String.valueOf(postList.size()));
+                    adapterGrid = new AdapterGrid(getApplicationContext(), R.layout.grid_postagem, imagesUrl );
+                    gridViewPerfil.setAdapter( adapterGrid );
+
+
+                }
+                else {
+                    try {
+                        JSONObject json = new JSONObject(response.errorBody().string());
+                        Dialog.dialogError(PerfilAmigoActivity.this, json.getString("message"), json.getString("details"));
+                    } catch (Exception e) {
+                        Toast.makeText(PerfilAmigoActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PostSearch> call, Throwable t) {
+                Toast.makeText(PerfilAmigoActivity.this, "Failure: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    public void carregarFotosPostagem(){
-    }
+
 
     public void recuperarDadosUsuariosLogado(){
         Call<UserProfile> call = userServices.getCurrentUser();
@@ -239,6 +274,7 @@ public class PerfilAmigoActivity extends AppCompatActivity {
                     friendUser = response.body();
                     loadUserData();
                     recuperarDadosUsuariosLogado();
+                    carregarFotosPostagem();
                 }
                 else{
                     try {
@@ -278,5 +314,10 @@ public class PerfilAmigoActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         finish();
         return false;
+    }
+
+    @Override
+    public void onRefresh() {
+
     }
 }

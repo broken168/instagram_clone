@@ -7,6 +7,9 @@ import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,11 +38,13 @@ import retrofit2.Retrofit;
  * Use the {@link FeedFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FeedFragment extends Fragment {
+public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
 
     private RecyclerView recyclerFeed;
     private AdapterFeed adapterFeed;
+
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     private List<Post> postList = new ArrayList<>();
 
@@ -96,6 +101,8 @@ public class FeedFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_feed, container, false);
 
         recyclerFeed = view.findViewById(R.id.recyclerFeed);
+        swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
+        swipeRefreshLayout.setOnRefreshListener(this);
 
         configRetrofit();
 
@@ -155,7 +162,6 @@ public class FeedFragment extends Fragment {
     }
 
     private void getPostsByIds(String ids) {
-
         Call<PostSearch> call = userServices.getPostsByIds(ids);
         call.enqueue(new Callback<PostSearch>() {
             @RequiresApi(api = Build.VERSION_CODES.N)
@@ -169,7 +175,9 @@ public class FeedFragment extends Fragment {
                             postList.add(post);
                         }
                     }
-                    Collections.sort(postList, Comparator.comparing(Post::getId));
+                    if(swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(false);
+
+                    Collections.sort(postList, Comparator.comparing(Post::getId).reversed());
                     adapterFeed.notifyDataSetChanged();
 
                 }
@@ -200,5 +208,10 @@ public class FeedFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
+    }
+
+    @Override
+    public void onRefresh() {
+        listarFeed();
     }
 }

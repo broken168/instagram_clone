@@ -10,10 +10,13 @@ import android.widget.ProgressBar;
 import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.annotation.GlideModule;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
+import com.bumptech.glide.module.AppGlideModule;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
@@ -21,18 +24,24 @@ import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class ImageDownloaderGlide {
+@GlideModule
+public class ImageDownloaderGlide extends AppGlideModule {
 
-    private static final String userCredentials = "gabrigov.instagram_clone@gabriel.govmail.com.br:cRfENlDB=REh";
-    private static final String basicAuth = "Basic " + new String(Base64.encode(userCredentials.getBytes(), Base64.NO_WRAP));
+    public static final String USER_CREDENTIALS = "gabrigov.instagram_clone@gabriel.govmail.com.br:cRfENlDB=REh";
+    public static final String BASIC_AUTH = "Basic " + new String(Base64.encode(USER_CREDENTIALS.getBytes(), Base64.NO_WRAP));
 
     public static void downloadImage(String url, Context context, ProgressBar progressBar, ImageView img){
 
         GlideUrl glideUrl = new GlideUrl(url, new LazyHeaders.Builder()
-                .addHeader("Authorization", basicAuth)
+                .addHeader("Authorization", BASIC_AUTH)
                 .build());
 
-        Glide.with(context).load(glideUrl).centerCrop().listener(new RequestListener<Drawable>() {
+        Glide.with(context)
+                .load(glideUrl)
+                .centerCrop()
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
+                .listener(new RequestListener<Drawable>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                 progressBar.setVisibility(View.GONE);
@@ -50,10 +59,15 @@ public class ImageDownloaderGlide {
     public static void downloadImage(String url, Context context, ProgressBar progressBar, CircleImageView img){
 
         GlideUrl glideUrl = new GlideUrl(url, new LazyHeaders.Builder()
-                .addHeader("Authorization", basicAuth)
+                .addHeader("Authorization", BASIC_AUTH)
                 .build());
 
-        Glide.with(context).load(glideUrl).centerCrop().listener(new RequestListener<Drawable>() {
+        Glide.with(context)
+                .load(glideUrl)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
+                .centerCrop()
+                .listener(new RequestListener<Drawable>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                 progressBar.setVisibility(View.GONE);
@@ -71,18 +85,29 @@ public class ImageDownloaderGlide {
     public static void downloadImage(String url, Context context, CircleImageView img){
 
         GlideUrl glideUrl = new GlideUrl(url, new LazyHeaders.Builder()
-                .addHeader("Authorization", basicAuth)
+                .addHeader("Authorization", BASIC_AUTH)
                 .build());
 
-        Glide.with(context).load(glideUrl).centerCrop().into(img);
+        Glide.with(context)
+                .load(glideUrl)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
+                .centerCrop()
+                .into(img)
+        ;
     }
 
     public static void downloadImage(String url, Context context,ImageView img){
 
         GlideUrl glideUrl = new GlideUrl(url, new LazyHeaders.Builder()
-                .addHeader("Authorization", basicAuth)
+                .addHeader("Authorization", BASIC_AUTH)
                 .build());
 
-        Glide.with(context).load(glideUrl).centerCrop().into(img);
+        Glide.with(context)
+                .load(glideUrl)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
+                .centerCrop()
+                .into(img);
     }
 }
