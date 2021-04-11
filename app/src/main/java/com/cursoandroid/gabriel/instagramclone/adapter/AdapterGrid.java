@@ -30,19 +30,12 @@ public class AdapterGrid extends ArrayAdapter<String> {
     private Context context;
     private int layoutResource;
     private List<String> urlFotos;
-    private DisplayImageOptions displayImageOptions;
 
     public AdapterGrid(@NonNull Context context, int resource, @NonNull List<String> objects) {
         super(context, resource, objects);
         this.context = context;
         this.layoutResource = resource;
         this.urlFotos = objects;
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", ImageDownloaderGlide.BASIC_AUTH);
-
-        displayImageOptions = new DisplayImageOptions.Builder()
-                .extraForDownloader(headers)
-                .build();
     }
 
     public class ViewHolder{
@@ -66,7 +59,7 @@ public class AdapterGrid extends ArrayAdapter<String> {
             viewHolder= (ViewHolder) convertView.getTag();
         }
         String urlImagem = getItem(position);
-        ImageDownloaderGlide.downloadImage(urlImagem, context, viewHolder.progressBar, viewHolder.imagem);
+        ImageDownloaderGlide.downloadImage(urlImagem, viewHolder.progressBar, viewHolder.imagem);
 
         return convertView;
     }

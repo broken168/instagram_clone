@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -140,17 +141,6 @@ public class PerfilFragment extends Fragment {
 
     }
 
-    public void inicializarImageLoader(){
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(Objects.requireNonNull(getActivity()))
-                .memoryCache(new LruMemoryCache(2 * 1024 * 1024))
-                .memoryCacheSize(2 * 1024 * 1024)
-                .diskCacheSize(50 * 1024 * 1024)
-                .diskCacheFileCount(100)
-                .diskCacheFileNameGenerator(new HashCodeFileNameGenerator()).build();
-
-        if(!ImageLoader.getInstance().isInited()) ImageLoader.getInstance().init(config);
-    }
-
     public void carregarFotosPostagem(){
 
 
@@ -191,7 +181,7 @@ public class PerfilFragment extends Fragment {
 
         String url = currentUser.getImageUrl();
         if(url != null && !url.equals("")){
-            ImageDownloaderGlide.downloadImage(url, getActivity(), progressBarImagePerfil, imgPerfil);
+            ImageDownloaderGlide.downloadImage(url, progressBarImagePerfil, imgPerfil);
         }else{
             progressBarImagePerfil.setVisibility(View.GONE);
         }
@@ -201,7 +191,6 @@ public class PerfilFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        inicializarImageLoader();
         Log.d(TAG, "onActivityCreated: criadaaaaa");
     }
 

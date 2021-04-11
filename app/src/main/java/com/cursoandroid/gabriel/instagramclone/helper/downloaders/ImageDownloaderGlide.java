@@ -29,8 +29,9 @@ public class ImageDownloaderGlide extends AppGlideModule {
 
     public static final String USER_CREDENTIALS = "gabrigov.instagram_clone@gabriel.govmail.com.br:cRfENlDB=REh";
     public static final String BASIC_AUTH = "Basic " + new String(Base64.encode(USER_CREDENTIALS.getBytes(), Base64.NO_WRAP));
+    public static Context context;
 
-    public static void downloadImage(String url, Context context, ProgressBar progressBar, ImageView img){
+    public static void downloadImage(String url, ProgressBar progressBar, ImageView img){
 
         GlideUrl glideUrl = new GlideUrl(url, new LazyHeaders.Builder()
                 .addHeader("Authorization", BASIC_AUTH)
@@ -56,7 +57,7 @@ public class ImageDownloaderGlide extends AppGlideModule {
         }).into(img);
     }
 
-    public static void downloadImage(String url, Context context, ProgressBar progressBar, CircleImageView img){
+    public static void downloadImage(String url, ProgressBar progressBar, CircleImageView img){
 
         GlideUrl glideUrl = new GlideUrl(url, new LazyHeaders.Builder()
                 .addHeader("Authorization", BASIC_AUTH)
@@ -82,7 +83,7 @@ public class ImageDownloaderGlide extends AppGlideModule {
         }).into(img);
     }
 
-    public static void downloadImage(String url, Context context, CircleImageView img){
+    public static void downloadImage(String url, CircleImageView img){
 
         GlideUrl glideUrl = new GlideUrl(url, new LazyHeaders.Builder()
                 .addHeader("Authorization", BASIC_AUTH)
@@ -97,7 +98,7 @@ public class ImageDownloaderGlide extends AppGlideModule {
         ;
     }
 
-    public static void downloadImage(String url, Context context,ImageView img){
+    public static void downloadImage(String url, ImageView img){
 
         GlideUrl glideUrl = new GlideUrl(url, new LazyHeaders.Builder()
                 .addHeader("Authorization", BASIC_AUTH)

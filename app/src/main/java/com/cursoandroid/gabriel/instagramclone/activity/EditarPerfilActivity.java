@@ -155,7 +155,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
 
         String url = currentUser.getImageUrl();
         if(url != null && !url.equals("")) {
-            ImageDownloaderGlide.downloadImage(url, this, progressBarImagePerfil, imageEditarPerfil);
+            ImageDownloaderGlide.downloadImage(url, progressBarImagePerfil, imageEditarPerfil);
         }else {
             progressBarImagePerfil.setVisibility(View.GONE);
         }

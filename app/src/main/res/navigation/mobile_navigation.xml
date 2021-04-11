@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:startDestination="@+id/navigation_feed"
+    android:id="@+id/mobile_navigation">
+
+    <fragment
+        android:id="@+id/navigation_feed"
+        android:name="com.cursoandroid.gabriel.instagramclone.fragment.FeedFragment"
+        android:label="Feed"
+        />
+
+    <fragment
+        android:id="@+id/navigation_search"
+        android:name="com.cursoandroid.gabriel.instagramclone.fragment.PesquisaFragment"
+        android:label="Pesquisar"
+        />
+
+    <fragment
+        android:id="@+id/navigation_post"
+        android:name="com.cursoandroid.gabriel.instagramclone.fragment.PostagemFragment"
+        android:label="Postagem"
+        />
+
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.cursoandroid.gabriel.instagramclone.fragment.PerfilFragment"
+        android:label="Perfil"
+        />
+
+</navigation>

@@ -302,7 +302,7 @@ public class PerfilAmigoActivity extends AppCompatActivity implements SwipeRefre
 
                 String url = friendUser.getImageUrl();
                 if(url != null && !url.equals("")){
-                    ImageDownloaderGlide.downloadImage(url, getApplicationContext(), progressBar, imagemPerfil);
+                    ImageDownloaderGlide.downloadImage(url, progressBar, imagemPerfil);
                 }else{
                     progressBar.setVisibility(View.GONE);
                 }

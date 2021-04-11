@@ -41,7 +41,7 @@ public class AdapterPesquisa extends RecyclerView.Adapter<AdapterPesquisa.MyView
         UserProfile user = userList.get(position);
         holder.nome.setText(user.getUsername());
         if(user.getImageUrl() != null) {
-            ImageDownloaderGlide.downloadImage(user.getImageUrl(), context, holder.foto);
+            ImageDownloaderGlide.downloadImage(user.getImageUrl(), holder.foto);
         }
 
     }

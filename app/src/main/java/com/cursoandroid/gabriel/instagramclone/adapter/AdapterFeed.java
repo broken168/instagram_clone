@@ -50,9 +50,10 @@ public class AdapterFeed extends RecyclerView.Adapter<AdapterFeed.MyViewHolder> 
 
         Post post = listPost.get(position);
 
-        ImageDownloaderGlide.downloadImage(post.getImageUrl(), context, holder.postImage);
+        ImageDownloaderGlide.downloadImage(post.getImageUrl(),holder.postImage);
         holder.name.setText(post.getUsername());
-        if (post.getUserImageUrl() != null ) ImageDownloaderGlide.downloadImage(post.getUserImageUrl(), context, holder.profilePhoto);        holder.description.setText(post.getDescription());
+        if (post.getUserImageUrl() != null ) ImageDownloaderGlide.downloadImage(post.getUserImageUrl(), holder.profilePhoto);
+        holder.description.setText(post.getDescription());
 
 
     }
