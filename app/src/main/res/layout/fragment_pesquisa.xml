@@ -27,7 +27,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/cinza"
-            android:theme="@style/AppTheme.Toolbar"/>
+            android:theme="@style/SearchView" />
     </androidx.cardview.widget.CardView>
 
     <androidx.recyclerview.widget.RecyclerView

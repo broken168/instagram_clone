@@ -10,18 +10,17 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cursoandroid.gabriel.instagramclone.R;
-import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
+import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderPicasso;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
+import com.google.android.material.imageview.ShapeableImageView;
 
 import java.util.List;
 
-import de.hdodenhof.circleimageview.CircleImageView;
 
 public class AdapterPesquisa extends RecyclerView.Adapter<AdapterPesquisa.MyViewHolder> {
 
     private List<UserProfile> userList;
     private Context context;
-    private CircleImageView image;
 
     public AdapterPesquisa(List<UserProfile> l, Context c) {
         this.userList = l;
@@ -41,7 +40,7 @@ public class AdapterPesquisa extends RecyclerView.Adapter<AdapterPesquisa.MyView
         UserProfile user = userList.get(position);
         holder.nome.setText(user.getUsername());
         if(user.getImageUrl() != null) {
-            ImageDownloaderGlide.downloadImage(user.getImageUrl(), holder.foto);
+            ImageDownloaderPicasso.loadImage(user.getImageUrl(), null, holder.foto);
         }
 
     }
@@ -52,7 +51,7 @@ public class AdapterPesquisa extends RecyclerView.Adapter<AdapterPesquisa.MyView
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        CircleImageView foto;
+        ShapeableImageView foto;
         TextView nome;
 
         public MyViewHolder(@NonNull View itemView) {

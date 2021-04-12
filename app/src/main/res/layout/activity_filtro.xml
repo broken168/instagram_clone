@@ -30,7 +30,7 @@
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/include3"
-        app:srcCompat="@drawable/avatar" />
+        app:srcCompat="@drawable/perfil" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/textInputLayout7"

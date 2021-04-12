@@ -18,45 +18,38 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cursoandroid.gabriel.instagramclone.R;
+import com.cursoandroid.gabriel.instagramclone.helper.Configurators;
 import com.cursoandroid.gabriel.instagramclone.helper.Converters;
 import com.cursoandroid.gabriel.instagramclone.helper.Dialog;
-import com.cursoandroid.gabriel.instagramclone.helper.MySharedPreferences;
 import com.cursoandroid.gabriel.instagramclone.helper.Permissao;
-import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
+import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderPicasso;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
 import com.cursoandroid.gabriel.instagramclone.services.FileService;
 import com.cursoandroid.gabriel.instagramclone.services.UserServices;
+import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textfield.TextInputEditText;
 
 import org.json.JSONObject;
 
-import java.io.IOException;
 
 
-import de.hdodenhof.circleimageview.CircleImageView;
 import dmax.dialog.SpotsDialog;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class EditarPerfilActivity extends AppCompatActivity {
 
-    private CircleImageView imageEditarPerfil;
+    private ShapeableImageView imageEditarPerfil;
     private TextView textAlterarFoto;
     private TextInputEditText editNomePerfil, editEmailPerfil;
     private Button buttonSalvar;
     private static final int SELECAO_GALERIA = 200;
     private Bitmap imageRecuperadaGaleria = null;
-    private Retrofit retrofit;
     private UserServices userServices;
     private FileService fileService;
 
-    private Uri localImagemSelecionada;
     private UserProfile currentUser;
     private ProgressBar progressBarImagePerfil;
     private AlertDialog dialog;
@@ -155,7 +148,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
 
         String url = currentUser.getImageUrl();
         if(url != null && !url.equals("")) {
-            ImageDownloaderGlide.downloadImage(url, progressBarImagePerfil, imageEditarPerfil);
+            ImageDownloaderPicasso.loadImage(url, progressBarImagePerfil, imageEditarPerfil);
         }else {
             progressBarImagePerfil.setVisibility(View.GONE);
         }
@@ -164,16 +157,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
 
 
     private void configRetrofit() {
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
-            @Override
-            public okhttp3.Response intercept(Chain chain) throws IOException {
-                Request newRequest  = chain.request().newBuilder()
-                        .addHeader("Authorization", new MySharedPreferences(getApplicationContext()).getToken())
-                        .build();
-                return chain.proceed(newRequest);
-            }
-        }).build();
-        retrofit = new Retrofit.Builder().baseUrl("http://189.84.65.150:8080").client(client).addConverterFactory(GsonConverterFactory.create()).build();
+        Retrofit retrofit = Configurators.retrofitConfigurator();
         fileService = retrofit.create(FileService.class);
         userServices = retrofit.create(UserServices.class);
     }
@@ -186,7 +170,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
             try{
 
                 if (requestCode == SELECAO_GALERIA) {
-                    localImagemSelecionada = data.getData();
+                    Uri localImagemSelecionada = data.getData();
                     imageRecuperadaGaleria = MediaStore.Images.Media.getBitmap(getContentResolver(), localImagemSelecionada);
                 }
 

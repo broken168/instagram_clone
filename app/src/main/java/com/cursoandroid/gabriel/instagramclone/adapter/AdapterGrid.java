@@ -1,8 +1,6 @@
 package com.cursoandroid.gabriel.instagramclone.adapter;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,15 +12,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.cursoandroid.gabriel.instagramclone.R;
-import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.FailReason;
-import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
+import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderPicasso;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 public class AdapterGrid extends ArrayAdapter<String> {
@@ -59,7 +51,7 @@ public class AdapterGrid extends ArrayAdapter<String> {
             viewHolder= (ViewHolder) convertView.getTag();
         }
         String urlImagem = getItem(position);
-        ImageDownloaderGlide.downloadImage(urlImagem, viewHolder.progressBar, viewHolder.imagem);
+        ImageDownloaderPicasso.loadImage(urlImagem, viewHolder.progressBar, viewHolder.imagem);
 
         return convertView;
     }

@@ -8,11 +8,11 @@
     android:paddingTop="4dp"
     android:paddingBottom="4dp">
 
-    <de.hdodenhof.circleimageview.CircleImageView
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/imagePerfilComentario"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:src="@drawable/avatar"
+        android:src="@drawable/perfil"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

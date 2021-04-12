@@ -10,13 +10,11 @@ import android.widget.TextView;
 import com.cursoandroid.gabriel.instagramclone.R;
 import com.cursoandroid.gabriel.instagramclone.model.Post;
 
-import de.hdodenhof.circleimageview.CircleImageView;
 
 public class VisualizarPostagemActivity extends AppCompatActivity {
 
     private TextView textPerfilPostagem, textQtdCurtidasPostagem, textDescricao;
     private ImageView imagePostagemSelecionada;
-    private CircleImageView imagemPerfilPostagem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +48,6 @@ public class VisualizarPostagemActivity extends AppCompatActivity {
     }
     public void inicializarComponentes(){
 
-        imagemPerfilPostagem = findViewById(R.id.imagePerfilPostagem);
         textDescricao = findViewById(R.id.textDescricaoPostagem);
         textPerfilPostagem = findViewById(R.id.textPerfilPostagem);
         textQtdCurtidasPostagem = findViewById(R.id.textQtdCurtidasPostagem);

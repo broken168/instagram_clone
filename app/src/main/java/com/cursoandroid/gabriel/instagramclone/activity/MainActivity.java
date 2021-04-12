@@ -4,63 +4,37 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.NavController;
-import androidx.navigation.NavDirections;
-import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Toast;
 
 
 import com.cursoandroid.gabriel.instagramclone.R;
-import com.cursoandroid.gabriel.instagramclone.fragment.FeedFragment;
-import com.cursoandroid.gabriel.instagramclone.fragment.PerfilFragment;
-import com.cursoandroid.gabriel.instagramclone.fragment.PesquisaFragment;
-import com.cursoandroid.gabriel.instagramclone.fragment.PostagemFragment;
 import com.cursoandroid.gabriel.instagramclone.helper.MySharedPreferences;
-import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
-import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
-import com.cursoandroid.gabriel.instagramclone.services.AuthService;
-import com.cursoandroid.gabriel.instagramclone.services.UserServices;
+import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderPicasso;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 
-import org.json.JSONObject;
-
-import java.io.IOException;
-
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 
 public class MainActivity extends AppCompatActivity {
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ImageDownloaderGlide.context = getApplicationContext();
+        ImageDownloaderPicasso.context = getApplicationContext();
 
         Toolbar toolbar = findViewById(R.id.toolbarPrincipal);
         setSupportActionBar(toolbar);

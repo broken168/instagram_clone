@@ -114,7 +114,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     private void configRetrofit() {
-        retrofit = Configurators.retrofitConfigurator(getActivity());
+        retrofit = Configurators.retrofitConfigurator();
         postService = retrofit.create(PostService.class);
         userServices = retrofit.create(UserServices.class);
     }
@@ -163,7 +163,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private void getPostsByIds(String ids) {
         Call<PostSearch> call = userServices.getPostsByIds(ids);
         call.enqueue(new Callback<PostSearch>() {
-            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onResponse(Call<PostSearch> call, Response<PostSearch> response) {
                 if(response.isSuccessful()){
@@ -175,8 +174,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                         }
                     }
                     if(swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(false);
-
-                    Collections.sort(postList, Comparator.comparing(Post::getId).reversed());
+                    if ( postList.size() > 0 ) Collections.sort(postList);
                     adapterFeed.notifyDataSetChanged();
 
                 }

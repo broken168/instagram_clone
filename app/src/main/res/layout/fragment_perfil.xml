@@ -7,16 +7,18 @@
     android:background="@color/black"
     tools:context=".fragment.PerfilFragment">
 
-    <de.hdodenhof.circleimageview.CircleImageView
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/imagePerfil"
         android:layout_width="80dp"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/perfil"
         android:layout_height="80dp"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
         android:layout_marginTop="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-    />
+        app:shapeAppearance="@style/ShapeAppearance.App.CircleImageView"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="0dp"

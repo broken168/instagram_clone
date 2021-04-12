@@ -1,7 +1,6 @@
 package com.cursoandroid.gabriel.instagramclone.adapter;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,14 +12,12 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cursoandroid.gabriel.instagramclone.R;
-import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
+import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderPicasso;
 import com.cursoandroid.gabriel.instagramclone.model.Post;
 import com.cursoandroid.gabriel.instagramclone.services.UserServices;
+import com.google.android.material.imageview.ShapeableImageView;
 import com.like.LikeButton;
-
 import java.util.List;
-
-import de.hdodenhof.circleimageview.CircleImageView;
 import retrofit2.Retrofit;
 
 public class AdapterFeed extends RecyclerView.Adapter<AdapterFeed.MyViewHolder> {
@@ -50,9 +47,9 @@ public class AdapterFeed extends RecyclerView.Adapter<AdapterFeed.MyViewHolder> 
 
         Post post = listPost.get(position);
 
-        ImageDownloaderGlide.downloadImage(post.getImageUrl(),holder.postImage);
+        ImageDownloaderPicasso.loadImage(post.getImageUrl(), null, holder.postImage);
         holder.name.setText(post.getUsername());
-        if (post.getUserImageUrl() != null ) ImageDownloaderGlide.downloadImage(post.getUserImageUrl(), holder.profilePhoto);
+        if (post.getUserImageUrl() != null ) ImageDownloaderPicasso.loadImage(post.getUserImageUrl(), null, holder.profilePhoto);
         holder.description.setText(post.getDescription());
 
 
@@ -65,7 +62,7 @@ public class AdapterFeed extends RecyclerView.Adapter<AdapterFeed.MyViewHolder> 
 
     public class MyViewHolder extends RecyclerView.ViewHolder{
 
-        CircleImageView profilePhoto;
+        ShapeableImageView profilePhoto;
         TextView name, description, likeNumber;
         ImageView postImage;
         ImageButton comentButton;

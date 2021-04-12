@@ -2,7 +2,7 @@ package com.cursoandroid.gabriel.instagramclone.model;
 
 import java.io.Serializable;
 
-public class Post implements Serializable{
+public class Post implements Serializable, Comparable<Post>{
 
     private String description, imageUrl, username, userImageUrl;
     private Long id;
@@ -65,5 +65,11 @@ public class Post implements Serializable{
         this.username = username;
     }
 
+    @Override
+    public int compareTo(Post otherPost) {
+        if(this.id < otherPost.getId()) return -1;
+        else if (this.id > otherPost.getId()) return 1;
+        else return 0;
+    }
 }
 

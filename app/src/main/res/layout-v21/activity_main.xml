@@ -18,15 +18,15 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <fragment
-        android:fragmentEnterTransition="@anim/nav_default_enter_anim"
-        android:fragmentExitTransition="@anim/nav_default_enter_anim"
-        android:fragmentReenterTransition="@anim/nav_default_enter_anim"
         android:id="@+id/nav_host_fragment"
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:fragmentEnterTransition="@anim/nav_default_enter_anim"
+        android:fragmentExitTransition="@anim/nav_default_enter_anim"
+        android:fragmentReenterTransition="@anim/nav_default_enter_anim"
         app:defaultNavHost="true"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/nav_view"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/include5"

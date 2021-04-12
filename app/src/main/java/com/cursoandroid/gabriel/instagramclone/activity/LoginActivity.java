@@ -86,7 +86,6 @@ public class LoginActivity extends AppCompatActivity {
         String campoSenha = editSenha.getText().toString();
 
         if(!campoEmail.isEmpty() && !campoSenha.isEmpty()){
-
             AccountCredentials accountCredentials = new AccountCredentials(campoEmail, campoSenha);
             logarUsuario(accountCredentials);
 

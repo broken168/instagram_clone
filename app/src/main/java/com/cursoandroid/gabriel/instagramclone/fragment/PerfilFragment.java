@@ -1,42 +1,38 @@
 package com.cursoandroid.gabriel.instagramclone.fragment;
 
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.cursoandroid.gabriel.instagramclone.R;
 import com.cursoandroid.gabriel.instagramclone.activity.EditarPerfilActivity;
+import com.cursoandroid.gabriel.instagramclone.activity.PerfilAmigoActivity;
 import com.cursoandroid.gabriel.instagramclone.adapter.AdapterGrid;
 import com.cursoandroid.gabriel.instagramclone.helper.Configurators;
 import com.cursoandroid.gabriel.instagramclone.helper.Dialog;
-import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
+import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderPicasso;
+import com.cursoandroid.gabriel.instagramclone.model.Post;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
+import com.cursoandroid.gabriel.instagramclone.search.PostSearch;
 import com.cursoandroid.gabriel.instagramclone.services.UserServices;
-import com.nostra13.universalimageloader.cache.disc.naming.HashCodeFileNameGenerator;
-import com.nostra13.universalimageloader.cache.memory.impl.LruMemoryCache;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.google.android.material.imageview.ShapeableImageView;
 
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
-import de.hdodenhof.circleimageview.CircleImageView;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -53,7 +49,7 @@ public class PerfilFragment extends Fragment {
 
     private TextView textPublicacoes, textSeguidores, textSeguindo;
     private ImageButton buttonEditarPerfil;
-    private CircleImageView imgPerfil;
+    private ShapeableImageView imgPerfil;
     public GridView gridViewPerfil;
     private AdapterGrid adapterGrid;
 
@@ -126,7 +122,7 @@ public class PerfilFragment extends Fragment {
     }
 
     private void configRetrofit() {
-        retrofit = Configurators.retrofitConfigurator(getActivity());
+        retrofit = Configurators.retrofitConfigurator();
         userServices = retrofit.create(UserServices.class);
     }
 
@@ -154,6 +150,7 @@ public class PerfilFragment extends Fragment {
                 if(response.isSuccessful()){
                     currentUser = response.body();
                     loadUserData();
+                    loadImagesPosts(currentUser.getId());
                 }else{
                     progressBarImagePerfil.setVisibility(View.GONE);
                     try {
@@ -171,6 +168,45 @@ public class PerfilFragment extends Fragment {
         });
     }
 
+    private void loadImagesPosts(Long id) {
+
+        Call<PostSearch> call = userServices.getPostsByIds(id.toString());
+        call.enqueue(new Callback<PostSearch>() {
+            @Override
+            public void onResponse(Call<PostSearch> call, Response<PostSearch> response) {
+
+                if(response.isSuccessful()){
+
+                    List<Post> postList = response.body().getContent().get(0).getPosts();
+
+                    List<String> imagesUrl = new ArrayList<>();
+                    for(Post post : postList) {
+                        imagesUrl.add(post.getImageUrl());
+                    }
+
+                    textPublicacoes.setText(String.valueOf(postList.size()));
+                    adapterGrid = new AdapterGrid(getActivity(), R.layout.grid_postagem, imagesUrl );
+                    gridViewPerfil.setAdapter( adapterGrid );
+
+
+                }
+                else {
+                    try {
+                        JSONObject json = new JSONObject(response.errorBody().string());
+                        Dialog.dialogError(getActivity(), json.getString("message"), json.getString("details"));
+                    } catch (Exception e) {
+                        Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PostSearch> call, Throwable t) {
+                Toast.makeText(getActivity(), "Failure: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     private void loadUserData() {
         List<Long> followers = currentUser.getFollowers();
         List<Long> following = currentUser.getFollowing();
@@ -181,7 +217,7 @@ public class PerfilFragment extends Fragment {
 
         String url = currentUser.getImageUrl();
         if(url != null && !url.equals("")){
-            ImageDownloaderGlide.downloadImage(url, progressBarImagePerfil, imgPerfil);
+            ImageDownloaderPicasso.loadImage(url, progressBarImagePerfil, imgPerfil);
         }else{
             progressBarImagePerfil.setVisibility(View.GONE);
         }

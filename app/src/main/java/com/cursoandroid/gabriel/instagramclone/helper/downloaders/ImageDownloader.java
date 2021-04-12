@@ -15,23 +15,17 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ImageDownloader extends AsyncTask<String, Void, Bitmap>{
 
     private ImageView image;
-    private CircleImageView circleImage;
     private ProgressBar progressBar;
 
     public ImageDownloader(ImageView image) {
         this.image = image;
     }
-    public ImageDownloader(CircleImageView image){
-        this.circleImage = image;
-    }
 
-    public ImageDownloader(CircleImageView image, ProgressBar progressBarImagePerfil) {
-        this.circleImage = image;
+    public ImageDownloader(ProgressBar progressBarImagePerfil) {
         this.progressBar = progressBarImagePerfil;
     }
 
@@ -66,7 +60,7 @@ public class ImageDownloader extends AsyncTask<String, Void, Bitmap>{
     @Override
     protected void onPostExecute(Bitmap bmp) {
         if(image != null) image.setImageBitmap(bmp);
-        else circleImage.setImageBitmap(bmp);
+        //else circleImage.setImageBitmap(bmp);
 
         if(progressBar != null) progressBar.setVisibility(View.GONE);
 

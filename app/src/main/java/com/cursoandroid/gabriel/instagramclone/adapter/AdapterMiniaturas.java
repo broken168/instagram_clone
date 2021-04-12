@@ -9,13 +9,9 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.cursoandroid.gabriel.instagramclone.R;
 import com.zomato.photofilters.utils.ThumbnailItem;
-
 import java.util.List;
-
-import de.hdodenhof.circleimageview.CircleImageView;
 
 public class AdapterMiniaturas extends RecyclerView.Adapter<AdapterMiniaturas.MyViewHolder> {
 

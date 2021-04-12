@@ -68,7 +68,6 @@ public class FiltroActivity extends AppCompatActivity {
 
     private UserProfile currentUser;
 
-    private Retrofit retrofit;
     private UserServices userServices;
     private FileService fileService;
     private PostService postService;
@@ -94,6 +93,7 @@ public class FiltroActivity extends AppCompatActivity {
                 .setMessage("Carregando dados do usuário...")
                 .setCancelable(false)
                 .build();
+        dialogCurrentUser.show();
 
         Toolbar toolbar = findViewById(R.id.toolbarAlternativa);
         toolbar.setTitleTextColor(getResources().getColor(R.color.white));
@@ -155,17 +155,19 @@ public class FiltroActivity extends AppCompatActivity {
                         Toast.makeText(FiltroActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
+                dialogCurrentUser.dismiss();
             }
 
             @Override
             public void onFailure(Call<UserProfile> call, Throwable t) {
                 Toast.makeText(FiltroActivity.this, "Failure: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                dialogCurrentUser.dismiss();
             }
         });
     }
 
     private void configRetrofit() {
-        retrofit = Configurators.retrofitConfigurator(getApplicationContext());
+        Retrofit retrofit = Configurators.retrofitConfigurator();
         fileService = retrofit.create(FileService.class);
         postService = retrofit.create(PostService.class);
         userServices = retrofit.create(UserServices.class);
@@ -222,6 +224,7 @@ public class FiltroActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(Call<Void> call, Throwable t) {
                     Toast.makeText(FiltroActivity.this, "Failure: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
                 }
             });
         }else{

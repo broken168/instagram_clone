@@ -50,8 +50,6 @@ public class CadastroActivity extends AppCompatActivity {
                 .setCancelable(false)
                 .build();
 
-
-
         retrofit = new Retrofit.Builder().baseUrl("http://189.84.65.150:8080").addConverterFactory(GsonConverterFactory.create()).build();
         authService = retrofit.create(AuthService.class);
 

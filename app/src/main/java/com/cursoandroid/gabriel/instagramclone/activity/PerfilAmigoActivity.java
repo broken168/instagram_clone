@@ -9,8 +9,6 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
@@ -23,11 +21,12 @@ import com.cursoandroid.gabriel.instagramclone.R;
 import com.cursoandroid.gabriel.instagramclone.adapter.AdapterGrid;
 import com.cursoandroid.gabriel.instagramclone.helper.Configurators;
 import com.cursoandroid.gabriel.instagramclone.helper.Dialog;
-import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
+import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderPicasso;
 import com.cursoandroid.gabriel.instagramclone.model.Post;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
 import com.cursoandroid.gabriel.instagramclone.search.PostSearch;
 import com.cursoandroid.gabriel.instagramclone.services.UserServices;
+import com.google.android.material.imageview.ShapeableImageView;
 
 import org.json.JSONObject;
 
@@ -37,7 +36,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import de.hdodenhof.circleimageview.CircleImageView;
 import dmax.dialog.SpotsDialog;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -47,7 +45,7 @@ import retrofit2.Retrofit;
 public class PerfilAmigoActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
     private TextView textButtonAcaoPerfil;
-    private CircleImageView imagemPerfil;
+    private ShapeableImageView imagemPerfil;
     private ImageButton buttonAcaoPerfil;
     private GridView gridViewPerfil;
     private ProgressBar progressBar;
@@ -115,7 +113,7 @@ public class PerfilAmigoActivity extends AppCompatActivity implements SwipeRefre
 
 
     private void configRetrofit() {
-        retrofit = Configurators.retrofitConfigurator(this);
+        retrofit = Configurators.retrofitConfigurator();
         userServices = retrofit.create(UserServices.class);
     }
 
@@ -139,14 +137,13 @@ public class PerfilAmigoActivity extends AppCompatActivity implements SwipeRefre
 
         Call<PostSearch> call = userServices.getPostsByIds(friendUser.getId().toString());
         call.enqueue(new Callback<PostSearch>() {
-            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onResponse(Call<PostSearch> call, Response<PostSearch> response) {
 
                 if(response.isSuccessful()){
 
                     List<Post> postList = response.body().getContent().get(0).getPosts();
-                    Collections.sort(postList, Comparator.comparing(Post::getId).reversed());
+
                     List<String> imagesUrl = new ArrayList<>();
                     for(Post post : postList) {
                         imagesUrl.add(post.getImageUrl());
@@ -302,7 +299,7 @@ public class PerfilAmigoActivity extends AppCompatActivity implements SwipeRefre
 
                 String url = friendUser.getImageUrl();
                 if(url != null && !url.equals("")){
-                    ImageDownloaderGlide.downloadImage(url, progressBar, imagemPerfil);
+                    ImageDownloaderPicasso.loadImage(url, progressBar, imagemPerfil);
                 }else{
                     progressBar.setVisibility(View.GONE);
                 }

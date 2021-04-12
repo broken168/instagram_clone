@@ -171,7 +171,7 @@ public class PesquisaFragment extends Fragment {
     }
 
     private void configRetrofit() {
-        retrofit = Configurators.retrofitConfigurator(getActivity());
+        retrofit = Configurators.retrofitConfigurator();
         userServices = retrofit.create(UserServices.class);
     }
 
@@ -185,8 +185,9 @@ public class PesquisaFragment extends Fragment {
             public void onResponse(Call<UserSearch> call, Response<UserSearch> response) {
                 if(response.isSuccessful()){
                     userSearch = response.body();
-                    listaUsuarios.addAll(response.body().getContent());
-                    listaUsuarios.remove(currentUser);
+                    for(UserProfile user : response.body().getContent()){
+                        if (!user.getId().equals(currentUser.getId())) listaUsuarios.add(user);
+                    }
                     adapterPesquisa.notifyDataSetChanged();
                 }else{
                     try {
