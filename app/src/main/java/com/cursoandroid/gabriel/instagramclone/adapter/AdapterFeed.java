@@ -1,6 +1,7 @@
 package com.cursoandroid.gabriel.instagramclone.adapter;
 
-import android.content.Context;
+import android.transition.Slide;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,10 +10,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cursoandroid.gabriel.instagramclone.R;
-import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderPicasso;
+import com.cursoandroid.gabriel.instagramclone.fragment.ViewCommentFragment;
+import com.cursoandroid.gabriel.instagramclone.helper.FeedCounter;
+import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
 import com.cursoandroid.gabriel.instagramclone.model.Post;
 import com.cursoandroid.gabriel.instagramclone.services.UserServices;
 import com.google.android.material.imageview.ShapeableImageView;
@@ -25,13 +29,17 @@ public class AdapterFeed extends RecyclerView.Adapter<AdapterFeed.MyViewHolder> 
     private List<Post> listPost;
     private Retrofit retrofit;
     private UserServices userServices;
-    private Context context;
+    private View view;
+    private FragmentActivity activity;
+    private Integer position;
+    private FeedCounter feedCounter;
 
-    public AdapterFeed(List<Post> listPost, Retrofit retrofit, Context context) {
+    public AdapterFeed(List<Post> listPost, Retrofit retrofit, View view, FragmentActivity activity) {
         this.listPost = listPost;
         this.retrofit = retrofit;
         userServices = retrofit.create(UserServices.class);
-        this.context = context;
+        this.view = view;
+        this.activity = activity;
     }
 
     @NonNull
@@ -47,13 +55,21 @@ public class AdapterFeed extends RecyclerView.Adapter<AdapterFeed.MyViewHolder> 
 
         Post post = listPost.get(position);
 
-        ImageDownloaderPicasso.loadImage(post.getImageUrl(), null, holder.postImage);
+        ImageDownloaderGlide.loadImage(post.getImageUrl(), activity, null, holder.postImage);
         holder.name.setText(post.getUsername());
-        if (post.getUserImageUrl() != null ) ImageDownloaderPicasso.loadImage(post.getUserImageUrl(), null, holder.profilePhoto);
+        if (post.getUserImageUrl() != null ) ImageDownloaderGlide.loadImage(post.getUserImageUrl(), activity, null, holder.profilePhoto);
         holder.description.setText(post.getDescription());
+        holder.comentButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ViewCommentFragment viewCommentFragment = new ViewCommentFragment(post.getId());
+                viewCommentFragment.show(activity.getSupportFragmentManager(), "ViewCommentFragment");
 
+            }
+        });
 
     }
+
 
     @Override
     public int getItemCount() {

@@ -167,7 +167,7 @@ public class FiltroActivity extends AppCompatActivity {
     }
 
     private void configRetrofit() {
-        Retrofit retrofit = Configurators.retrofitConfigurator();
+        Retrofit retrofit = Configurators.retrofitConfigurator(getApplicationContext());
         fileService = retrofit.create(FileService.class);
         postService = retrofit.create(PostService.class);
         userServices = retrofit.create(UserServices.class);

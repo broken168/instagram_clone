@@ -67,8 +67,8 @@ public class Post implements Serializable, Comparable<Post>{
 
     @Override
     public int compareTo(Post otherPost) {
-        if(this.id < otherPost.getId()) return -1;
-        else if (this.id > otherPost.getId()) return 1;
+        if(this.id < otherPost.getId()) return 1;
+        else if (this.id > otherPost.getId()) return -1;
         else return 0;
     }
 }

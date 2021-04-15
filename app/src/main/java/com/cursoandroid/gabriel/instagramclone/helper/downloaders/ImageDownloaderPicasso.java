@@ -8,11 +8,15 @@ import android.util.Base64;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+
+import com.bumptech.glide.annotation.GlideModule;
 import com.cursoandroid.gabriel.instagramclone.R;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
 
+import coil.Coil;
+import coil.util.CoilUtils;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -22,7 +26,6 @@ public class ImageDownloaderPicasso extends Application {
     public static final String USER_CREDENTIALS = "gabrigov.instagram_clone@gabriel.govmail.com.br:cRfENlDB=REh";
     public static final String BASIC_AUTH = "Basic " + new String(Base64.encode(USER_CREDENTIALS.getBytes(), Base64.NO_WRAP));
 
-    public static Context context;
     private static final OkHttpClient client = new OkHttpClient.Builder().addInterceptor(chain -> {
                 Request newRequest = chain.request().newBuilder()
                         .addHeader("Authorization", BASIC_AUTH)
@@ -32,7 +35,7 @@ public class ImageDownloaderPicasso extends Application {
             .build();
 
 
-    public static void loadImage(String url, ProgressBar progressBar, ImageView imageView){
+    public static void loadImage(String url, Context context, ProgressBar progressBar, ImageView imageView){
         Picasso picasso = new Picasso.Builder(context)
                 .downloader(new OkHttp3Downloader(client))
                 .build();

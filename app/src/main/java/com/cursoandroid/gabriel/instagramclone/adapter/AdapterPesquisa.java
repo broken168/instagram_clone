@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cursoandroid.gabriel.instagramclone.R;
+import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
 import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderPicasso;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
 import com.google.android.material.imageview.ShapeableImageView;
@@ -40,7 +41,7 @@ public class AdapterPesquisa extends RecyclerView.Adapter<AdapterPesquisa.MyView
         UserProfile user = userList.get(position);
         holder.nome.setText(user.getUsername());
         if(user.getImageUrl() != null) {
-            ImageDownloaderPicasso.loadImage(user.getImageUrl(), null, holder.foto);
+            ImageDownloaderGlide.loadImage(user.getImageUrl(), context, null, holder.foto);
         }
 
     }

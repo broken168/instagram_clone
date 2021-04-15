@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.cursoandroid.gabriel.instagramclone.R;
+import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
 import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderPicasso;
 
 import java.util.List;
@@ -51,7 +52,7 @@ public class AdapterGrid extends ArrayAdapter<String> {
             viewHolder= (ViewHolder) convertView.getTag();
         }
         String urlImagem = getItem(position);
-        ImageDownloaderPicasso.loadImage(urlImagem, viewHolder.progressBar, viewHolder.imagem);
+        ImageDownloaderGlide.loadImage(urlImagem, context, viewHolder.progressBar, viewHolder.imagem);
 
         return convertView;
     }

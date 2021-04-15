@@ -21,6 +21,7 @@ import com.cursoandroid.gabriel.instagramclone.R;
 import com.cursoandroid.gabriel.instagramclone.adapter.AdapterGrid;
 import com.cursoandroid.gabriel.instagramclone.helper.Configurators;
 import com.cursoandroid.gabriel.instagramclone.helper.Dialog;
+import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
 import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderPicasso;
 import com.cursoandroid.gabriel.instagramclone.model.Post;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
@@ -113,7 +114,7 @@ public class PerfilAmigoActivity extends AppCompatActivity implements SwipeRefre
 
 
     private void configRetrofit() {
-        retrofit = Configurators.retrofitConfigurator();
+        retrofit = Configurators.retrofitConfigurator(getApplicationContext());
         userServices = retrofit.create(UserServices.class);
     }
 
@@ -299,7 +300,7 @@ public class PerfilAmigoActivity extends AppCompatActivity implements SwipeRefre
 
                 String url = friendUser.getImageUrl();
                 if(url != null && !url.equals("")){
-                    ImageDownloaderPicasso.loadImage(url, progressBar, imagemPerfil);
+                    ImageDownloaderGlide.loadImage(url, getApplicationContext(), progressBar, imagemPerfil);
                 }else{
                     progressBar.setVisibility(View.GONE);
                 }

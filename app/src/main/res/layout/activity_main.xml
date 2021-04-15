@@ -18,9 +18,6 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <fragment
-        android:fragmentEnterTransition="@anim/nav_default_enter_anim"
-        android:fragmentExitTransition="@anim/nav_default_enter_anim"
-        android:fragmentReenterTransition="@anim/nav_default_enter_anim"
         android:id="@+id/nav_host_fragment"
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="0dp"

@@ -1,14 +1,20 @@
 package com.cursoandroid.gabriel.instagramclone.fragment;
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +23,7 @@ import com.cursoandroid.gabriel.instagramclone.R;
 import com.cursoandroid.gabriel.instagramclone.adapter.AdapterFeed;
 import com.cursoandroid.gabriel.instagramclone.helper.Configurators;
 import com.cursoandroid.gabriel.instagramclone.helper.Dialog;
+import com.cursoandroid.gabriel.instagramclone.helper.FeedCounter;
 import com.cursoandroid.gabriel.instagramclone.model.Post;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
 import com.cursoandroid.gabriel.instagramclone.search.PostSearch;
@@ -37,7 +44,7 @@ import retrofit2.Retrofit;
  * Use the {@link FeedFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
+public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener{
 
 
     private RecyclerView recyclerFeed;
@@ -52,6 +59,9 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private UserServices userServices;
 
     private UserProfile currentUser;
+    private final String TAG = "FeedFragment";
+
+
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -64,6 +74,14 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     public FeedFragment() {
         // Required empty public constructor
+    }
+
+    private FragmentActivity activity;
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        activity = (FragmentActivity) context;
     }
 
     /**
@@ -86,35 +104,39 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate: ");
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
     }
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView: ");
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_feed, container, false);
-
         recyclerFeed = view.findViewById(R.id.recyclerFeed);
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
         swipeRefreshLayout.setOnRefreshListener(this);
 
+        getActivity().getSupportFragmentManager();
         configRetrofit();
 
-        adapterFeed = new AdapterFeed(postList, retrofit, getActivity());
+        adapterFeed = new AdapterFeed(postList, retrofit, view, activity);
         recyclerFeed.setHasFixedSize(true);
-        recyclerFeed.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerFeed.setLayoutManager(new LinearLayoutManager(activity));
         recyclerFeed.setAdapter(adapterFeed);
-
         return view;
     }
 
     private void configRetrofit() {
-        retrofit = Configurators.retrofitConfigurator();
+        retrofit = Configurators.retrofitConfigurator(activity);
         postService = retrofit.create(PostService.class);
         userServices = retrofit.create(UserServices.class);
     }
@@ -131,16 +153,16 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 else {
                     try {
                         JSONObject json = new JSONObject(response.errorBody().string());
-                        Dialog.dialogError(getActivity(), json.getString("message"), json.getString("details"));
+                        Dialog.dialogError(activity, json.getString("message"), json.getString("details"));
                     } catch (Exception e) {
-                        Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
             }
 
             @Override
             public void onFailure(Call<UserProfile> call, Throwable t) {
-                Toast.makeText(getActivity(), "Failure: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity, "Failure: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -157,6 +179,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             }
         }
         if(!ids.toString().isEmpty()) getPostsByIds(ids.toString());
+        else Toast.makeText(activity, "Você não está seguindo ninguém", Toast.LENGTH_SHORT).show();
 
     }
 
@@ -181,29 +204,29 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 else {
                     try {
                         JSONObject json = new JSONObject(response.errorBody().string());
-                        Dialog.dialogError(getActivity(), json.getString("message"), json.getString("details"));
+                        Dialog.dialogError(activity, json.getString("message"), json.getString("details"));
                     } catch (Exception e) {
-                        Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
             }
 
             @Override
             public void onFailure(Call<PostSearch> call, Throwable t) {
-                Toast.makeText(getActivity(), "Failure: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity, "Failure: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
         getCurrentUser();
     }
 
     @Override
     public void onRefresh() {
-        listarFeed();
+        getCurrentUser();
     }
+
 }

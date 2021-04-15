@@ -21,7 +21,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.InstagramClone">
-        <activity android:name=".activity.VisualizarComentariosActivity"></activity>
         <activity android:name=".activity.VisualizarPostagemActivity" />
         <activity android:name=".activity.FiltroActivity" />
         <activity android:name=".activity.PerfilAmigoActivity" />

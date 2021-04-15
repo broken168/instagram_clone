@@ -17,31 +17,24 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <fragment
+
+    <androidx.drawerlayout.widget.DrawerLayout
         android:id="@+id/nav_host_fragment"
-        android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:fragmentEnterTransition="@anim/nav_default_enter_anim"
-        android:fragmentExitTransition="@anim/nav_default_enter_anim"
-        android:fragmentReenterTransition="@anim/nav_default_enter_anim"
-        app:defaultNavHost="true"
         app:layout_constraintBottom_toTopOf="@+id/nav_view"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/include5"
-        app:navGraph="@navigation/mobile_navigation">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/include5" />
 
-    </fragment>
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
+    <com.ashokvarma.bottomnavigation.BottomNavigationBar
         android:id="@+id/nav_view"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
+        app:bnbBackgroundColor="@color/white"
         android:layout_height="wrap_content"
-        android:background="@color/black"
+        app:bnbBackgroundStyle="background_style_static"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:menu="@menu/menu_bottom_navigation" />
-
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,8 +1,11 @@
 package com.cursoandroid.gabriel.instagramclone.fragment;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
@@ -17,22 +20,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.cursoandroid.gabriel.instagramclone.R;
 import com.cursoandroid.gabriel.instagramclone.activity.EditarPerfilActivity;
-import com.cursoandroid.gabriel.instagramclone.activity.PerfilAmigoActivity;
 import com.cursoandroid.gabriel.instagramclone.adapter.AdapterGrid;
 import com.cursoandroid.gabriel.instagramclone.helper.Configurators;
 import com.cursoandroid.gabriel.instagramclone.helper.Dialog;
+import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
 import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderPicasso;
 import com.cursoandroid.gabriel.instagramclone.model.Post;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
 import com.cursoandroid.gabriel.instagramclone.search.PostSearch;
 import com.cursoandroid.gabriel.instagramclone.services.UserServices;
 import com.google.android.material.imageview.ShapeableImageView;
-
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -57,6 +57,8 @@ public class PerfilFragment extends Fragment {
     private UserServices userServices;
     private UserProfile currentUser;
 
+    private Activity activity;
+
     private ProgressBar progressBarImagePerfil;
 
 
@@ -71,6 +73,14 @@ public class PerfilFragment extends Fragment {
 
     public PerfilFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if( context instanceof Activity){
+            activity = (Activity) context;
+        }
     }
 
     /**
@@ -122,7 +132,7 @@ public class PerfilFragment extends Fragment {
     }
 
     private void configRetrofit() {
-        retrofit = Configurators.retrofitConfigurator();
+        retrofit = Configurators.retrofitConfigurator(activity);
         userServices = retrofit.create(UserServices.class);
     }
 
@@ -155,15 +165,15 @@ public class PerfilFragment extends Fragment {
                     progressBarImagePerfil.setVisibility(View.GONE);
                     try {
                         JSONObject json = new JSONObject(response.errorBody().string());
-                        Dialog.dialogError(getActivity(), json.getString("message"), json.getString("details"));
+                        Dialog.dialogError(activity, json.getString("message"), json.getString("details"));
                     } catch (Exception e) {
-                        Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
             }
             @Override
             public void onFailure(Call<UserProfile> call, Throwable t) {
-                Toast.makeText(getActivity(), "Failure: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(activity, "Failure: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -185,7 +195,7 @@ public class PerfilFragment extends Fragment {
                     }
 
                     textPublicacoes.setText(String.valueOf(postList.size()));
-                    adapterGrid = new AdapterGrid(getActivity(), R.layout.grid_postagem, imagesUrl );
+                    adapterGrid = new AdapterGrid(activity, R.layout.grid_postagem, imagesUrl );
                     gridViewPerfil.setAdapter( adapterGrid );
 
 
@@ -193,16 +203,16 @@ public class PerfilFragment extends Fragment {
                 else {
                     try {
                         JSONObject json = new JSONObject(response.errorBody().string());
-                        Dialog.dialogError(getActivity(), json.getString("message"), json.getString("details"));
+                        Dialog.dialogError(activity, json.getString("message"), json.getString("details"));
                     } catch (Exception e) {
-                        Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
             }
 
             @Override
             public void onFailure(Call<PostSearch> call, Throwable t) {
-                Toast.makeText(getActivity(), "Failure: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity, "Failure: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -217,7 +227,7 @@ public class PerfilFragment extends Fragment {
 
         String url = currentUser.getImageUrl();
         if(url != null && !url.equals("")){
-            ImageDownloaderPicasso.loadImage(url, progressBarImagePerfil, imgPerfil);
+            ImageDownloaderGlide.loadImage(url, activity, progressBarImagePerfil, imgPerfil);
         }else{
             progressBarImagePerfil.setVisibility(View.GONE);
         }

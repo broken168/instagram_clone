@@ -1,8 +1,11 @@
 package com.cursoandroid.gabriel.instagramclone.fragment;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -65,6 +68,16 @@ public class PesquisaFragment extends Fragment {
         // Required empty public constructor
     }
 
+    private Activity activity;
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if( context instanceof Activity){
+            activity = (Activity) context;
+        }
+    }
+
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -101,20 +114,20 @@ public class PesquisaFragment extends Fragment {
         searchViewPesquisa = view.findViewById(R.id.searchViewPesquisa);
         recyclerViewPesquisar = view.findViewById(R.id.recyclerViewPesquisa);
         recyclerViewPesquisar.setHasFixedSize(true);
-        recyclerViewPesquisar.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerViewPesquisar.setLayoutManager(new LinearLayoutManager(activity));
 
         configRetrofit();
         getCurrentUser();
 
-        adapterPesquisa = new AdapterPesquisa(listaUsuarios, getActivity());
+        adapterPesquisa = new AdapterPesquisa(listaUsuarios, activity);
 
         recyclerViewPesquisar.setAdapter(adapterPesquisa);
 
-        recyclerViewPesquisar.addOnItemTouchListener(new RecyclerItemClickListener(getActivity(), recyclerViewPesquisar, new RecyclerItemClickListener.OnItemClickListener() {
+        recyclerViewPesquisar.addOnItemTouchListener(new RecyclerItemClickListener(activity, recyclerViewPesquisar, new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
                 //Usuario usuario = listaUsuarios.get(position);
-                Intent i = new Intent(getActivity(), PerfilAmigoActivity.class);
+                Intent i = new Intent(activity, PerfilAmigoActivity.class);
                 i.putExtra("user", listaUsuarios.get(position).getId());
                 startActivity(i);
             }
@@ -157,9 +170,9 @@ public class PesquisaFragment extends Fragment {
                 }else{
                     try {
                         JSONObject json = new JSONObject(response.errorBody().string());
-                        Dialog.dialogError(getActivity(), json.getString("message"), json.getString("details"));
+                        Dialog.dialogError(activity, json.getString("message"), json.getString("details"));
                     } catch (Exception e) {
-                        Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
             }
@@ -171,7 +184,7 @@ public class PesquisaFragment extends Fragment {
     }
 
     private void configRetrofit() {
-        retrofit = Configurators.retrofitConfigurator();
+        retrofit = Configurators.retrofitConfigurator(activity);
         userServices = retrofit.create(UserServices.class);
     }
 
@@ -192,9 +205,9 @@ public class PesquisaFragment extends Fragment {
                 }else{
                     try {
                         JSONObject json = new JSONObject(response.errorBody().string());
-                        Dialog.dialogError(getContext(), json.getString("message"), json.getString("details"));
+                        Dialog.dialogError(activity, json.getString("message"), json.getString("details"));
                     } catch (Exception e) {
-                        Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
 
@@ -202,7 +215,7 @@ public class PesquisaFragment extends Fragment {
 
             @Override
             public void onFailure(Call<UserSearch> call, Throwable t) {
-                Toast.makeText(getActivity(), "Erro ao fazer pesquisa. " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity, "Erro ao fazer pesquisa. " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
 

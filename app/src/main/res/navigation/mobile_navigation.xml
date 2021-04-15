@@ -20,12 +20,13 @@
         android:id="@+id/navigation_post"
         android:name="com.cursoandroid.gabriel.instagramclone.fragment.PostagemFragment"
         android:label="Postagem"
-        />
+    />
 
     <fragment
         android:id="@+id/navigation_profile"
         android:name="com.cursoandroid.gabriel.instagramclone.fragment.PerfilFragment"
         android:label="Perfil"
-        />
+
+    />
 
 </navigation>

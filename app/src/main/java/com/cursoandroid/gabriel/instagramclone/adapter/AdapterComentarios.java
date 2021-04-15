@@ -8,18 +8,21 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.cursoandroid.gabriel.instagramclone.R;
-import com.cursoandroid.gabriel.instagramclone.model.Comentario;
+import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
+import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderPicasso;
+import com.cursoandroid.gabriel.instagramclone.model.Comment;
+import com.google.android.material.imageview.ShapeableImageView;
 
 import java.util.List;
 
 
 public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.MyViewHolder> {
 
-    private List<Comentario> listaComentarios;
+    private List<Comment> listaComments;
     private Context context;
 
-    public AdapterComentarios(List<Comentario> listaComentarios, Context context) {
-        this.listaComentarios = listaComentarios;
+    public AdapterComentarios(List<Comment> listaComments, Context context) {
+        this.listaComments = listaComments;
         this.context = context;
     }
 
@@ -33,32 +36,32 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
 
-        Comentario comentario = listaComentarios.get(position);
+        Comment comment = listaComments.get(position);
 
-        if(!comentario.getCaminhoFoto().equals("")){
-
-        }else{
-
+        if(comment.getUserImageUrl() != null){
+            ImageDownloaderGlide.loadImage(comment.getUserImageUrl(), context, null, holder.imageView);
         }
 
-        holder.textComentario.setText(comentario.getComentario());
-        holder.textNome.setText(comentario.getNome());
+        holder.textComentario.setText(comment.getMsg());
+        holder.textNome.setText(comment.getUsername());
 
     }
 
     @Override
     public int getItemCount() {
-        return listaComentarios.size();
+        return listaComments.size();
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder{
 
 
         private TextView textNome, textComentario;
+        private ShapeableImageView imageView;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
 
+            imageView = itemView.findViewById(R.id.imagePerfilComentario);
             textComentario = itemView.findViewById(R.id.textComentario);
             textNome = itemView.findViewById(R.id.textNomeComentario);
         }

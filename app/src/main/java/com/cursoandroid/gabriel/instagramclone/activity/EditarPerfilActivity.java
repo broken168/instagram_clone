@@ -22,6 +22,7 @@ import com.cursoandroid.gabriel.instagramclone.helper.Configurators;
 import com.cursoandroid.gabriel.instagramclone.helper.Converters;
 import com.cursoandroid.gabriel.instagramclone.helper.Dialog;
 import com.cursoandroid.gabriel.instagramclone.helper.Permissao;
+import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
 import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderPicasso;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
 import com.cursoandroid.gabriel.instagramclone.services.FileService;
@@ -148,7 +149,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
 
         String url = currentUser.getImageUrl();
         if(url != null && !url.equals("")) {
-            ImageDownloaderPicasso.loadImage(url, progressBarImagePerfil, imageEditarPerfil);
+            ImageDownloaderGlide.loadImage(url, getApplicationContext(), progressBarImagePerfil, imageEditarPerfil);
         }else {
             progressBarImagePerfil.setVisibility(View.GONE);
         }
@@ -157,7 +158,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
 
 
     private void configRetrofit() {
-        Retrofit retrofit = Configurators.retrofitConfigurator();
+        Retrofit retrofit = Configurators.retrofitConfigurator(getApplicationContext());
         fileService = retrofit.create(FileService.class);
         userServices = retrofit.create(UserServices.class);
     }

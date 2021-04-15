@@ -2,6 +2,7 @@ package com.cursoandroid.gabriel.instagramclone.fragment;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -72,6 +73,16 @@ public class PostagemFragment extends Fragment {
         // Required empty public constructor
     }
 
+    private Activity activity;
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if( context instanceof Activity){
+            activity = (Activity) context;
+        }
+    }
+
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -108,13 +119,13 @@ public class PostagemFragment extends Fragment {
         buttonAbrirCamera = view.findViewById(R.id.buttonAbrirCamera);
         buttonAbrirGaleria = view.findViewById(R.id.buttonAbrirGaleria);
 
-        Permissao.validarPermissoes(permissoesNecessarias, getActivity(), 1);
+        Permissao.validarPermissoes(permissoesNecessarias, activity, 1);
 
         buttonAbrirCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                if(i.resolveActivity(getActivity().getPackageManager()) != null){
+                if(i.resolveActivity(activity.getPackageManager()) != null){
                     startActivityForResult(i, SELECAO_CAMERA);
                 }
             }
@@ -124,7 +135,7 @@ public class PostagemFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                if(i.resolveActivity(getActivity().getPackageManager()) != null){
+                if(i.resolveActivity(activity.getPackageManager()) != null){
                     startActivityForResult(i, SELECAO_GALERIA);
                 }
             }
@@ -150,7 +161,7 @@ public class PostagemFragment extends Fragment {
                         break;
                     case SELECAO_GALERIA:
                         localImagemSelecionada = data.getData();
-                        imagem = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), localImagemSelecionada);
+                        imagem = MediaStore.Images.Media.getBitmap(activity.getContentResolver(), localImagemSelecionada);
                         break;
                 }
 
@@ -160,7 +171,7 @@ public class PostagemFragment extends Fragment {
                     imagem.compress(Bitmap.CompressFormat.JPEG, 50, baos);
                     byte[] dadosImagem = baos.toByteArray();
 
-                    Intent i = new Intent(getActivity(), FiltroActivity.class);
+                    Intent i = new Intent(activity, FiltroActivity.class);
                     i.putExtra("fotoEscolhida", dadosImagem);
                     startActivity(i);
                 }
