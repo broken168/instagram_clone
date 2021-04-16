@@ -2,12 +2,12 @@ package com.cursoandroid.gabriel.instagramclone.fragment;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.FragmentKt;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,12 +19,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.cursoandroid.gabriel.instagramclone.R;
-import com.cursoandroid.gabriel.instagramclone.activity.EditarPerfilActivity;
 import com.cursoandroid.gabriel.instagramclone.adapter.AdapterGrid;
 import com.cursoandroid.gabriel.instagramclone.helper.Configurators;
 import com.cursoandroid.gabriel.instagramclone.helper.Dialog;
 import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
-import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderPicasso;
 import com.cursoandroid.gabriel.instagramclone.model.Post;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
 import com.cursoandroid.gabriel.instagramclone.search.PostSearch;
@@ -45,7 +43,7 @@ import static android.content.ContentValues.TAG;
  * Use the {@link PerfilFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class PerfilFragment extends Fragment {
+public class PerfilFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
     private TextView textPublicacoes, textSeguidores, textSeguindo;
     private ImageButton buttonEditarPerfil;
@@ -58,6 +56,8 @@ public class PerfilFragment extends Fragment {
     private UserProfile currentUser;
 
     private Activity activity;
+
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     private ProgressBar progressBarImagePerfil;
 
@@ -118,15 +118,13 @@ public class PerfilFragment extends Fragment {
         inicializarComponentes(view);
         configRetrofit();
 
-        carregarInformacoesUsuario();
-        carregarFotosPostagem();
+        swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
+        swipeRefreshLayout.setOnRefreshListener(this);
 
-        buttonEditarPerfil.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(getActivity(), EditarPerfilActivity.class));
-            }
-        });
+        carregarInformacoesUsuario();
+
+        buttonEditarPerfil.setOnClickListener(v ->
+                FragmentKt.findNavController(PerfilFragment.this).navigate(R.id.action_profile_to_edit_profile));
 
         return view;
     }
@@ -147,11 +145,6 @@ public class PerfilFragment extends Fragment {
 
     }
 
-    public void carregarFotosPostagem(){
-
-
-
-    }
     public void carregarInformacoesUsuario(){
         Call<UserProfile> call = userServices.getCurrentUser();
         call.enqueue(new Callback<UserProfile>() {
@@ -170,6 +163,7 @@ public class PerfilFragment extends Fragment {
                         Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
+                if ( swipeRefreshLayout.isRefreshing() ) swipeRefreshLayout.setRefreshing(false);
             }
             @Override
             public void onFailure(Call<UserProfile> call, Throwable t) {
@@ -248,5 +242,10 @@ public class PerfilFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+    }
+
+    @Override
+    public void onRefresh() {
+        carregarInformacoesUsuario();
     }
 }

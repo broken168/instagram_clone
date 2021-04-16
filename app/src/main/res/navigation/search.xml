@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/search"
+    app:startDestination="@id/principal">
+
+    <fragment
+        android:id="@+id/principal"
+        android:name="com.cursoandroid.gabriel.instagramclone.fragment.PesquisaFragment"
+        android:label="Search"
+        tools:layout="@layout/fragment_pesquisa"
+        />
+
+</navigation>

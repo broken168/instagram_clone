@@ -3,7 +3,7 @@ package com.cursoandroid.gabriel.instagramclone.model;
 public class PostagemCurtida {
 
     public int qtdCurtida = 0;
-    public Feed feed;
+
 
     public PostagemCurtida() {
     }
@@ -26,12 +26,6 @@ public class PostagemCurtida {
         this.qtdCurtida = qtdCurtida;
     }
 
-    public Feed getFeed() {
-        return feed;
-    }
 
-    public void setFeed(Feed feed) {
-        this.feed = feed;
-    }
 
 }

@@ -24,9 +24,6 @@
         <activity android:name=".activity.VisualizarPostagemActivity" />
         <activity android:name=".activity.FiltroActivity" />
         <activity android:name=".activity.PerfilAmigoActivity" />
-        <activity
-            android:name=".activity.EditarPerfilActivity"
-            android:parentActivityName=".activity.MainActivity" />
         <activity android:name=".activity.CadastroActivity" />
         <activity android:name=".activity.MainActivity" />
         <activity android:name=".activity.LoginActivity">

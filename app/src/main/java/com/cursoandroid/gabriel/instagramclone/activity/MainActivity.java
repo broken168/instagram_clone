@@ -1,49 +1,35 @@
 package com.cursoandroid.gabriel.instagramclone.activity;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.navigation.NavController;
-import androidx.navigation.NavDeepLink;
-import androidx.navigation.NavDirections;
-import androidx.navigation.NavOptions;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
-
 import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
 
-import com.ashokvarma.bottomnavigation.BottomNavigationBar;
-import com.ashokvarma.bottomnavigation.BottomNavigationItem;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+import androidx.navigation.NavController;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
+
 import com.cursoandroid.gabriel.instagramclone.R;
-import com.cursoandroid.gabriel.instagramclone.fragment.FeedFragment;
-import com.cursoandroid.gabriel.instagramclone.fragment.PerfilFragment;
-import com.cursoandroid.gabriel.instagramclone.fragment.PesquisaFragment;
-import com.cursoandroid.gabriel.instagramclone.fragment.PostagemFragment;
-import com.cursoandroid.gabriel.instagramclone.helper.KeepStateNavigator;
 import com.cursoandroid.gabriel.instagramclone.helper.MySharedPreferences;
-import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderPicasso;
+import com.cursoandroid.gabriel.instagramclone.helper.NavigationExtensionsKt;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import java.util.Arrays;
+import java.util.List;
+
+import kotlin.jvm.internal.Intrinsics;
 
 public class MainActivity extends AppCompatActivity {
 
-    final Fragment feedFragment = new FeedFragment();
-    final Fragment pesquisaFragment = new PesquisaFragment();
-    final Fragment postagemFragment = new PostagemFragment();
-    final Fragment perfilFragment = new PerfilFragment();
-    final FragmentManager fm = getSupportFragmentManager();
-    Fragment active = feedFragment;
+    private LiveData<NavController> currentNavController = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,67 +41,31 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("");
 
 
-        fm.beginTransaction().add(R.id.nav_host_fragment,feedFragment, "1").commit();
-        fm.beginTransaction().add(R.id.nav_host_fragment, perfilFragment, "4").hide(perfilFragment).commit();
-        fm.beginTransaction().add(R.id.nav_host_fragment, postagemFragment, "2").hide(postagemFragment).commit();
-        fm.beginTransaction().add(R.id.nav_host_fragment, pesquisaFragment, "2").hide(pesquisaFragment).commit();
-
-
         configurarBottomNavigationView();
 
     }
 
     private void configurarBottomNavigationView() {
 
-        //BottomNavigationView bottomNavigationView = findViewById(R.id.nav_view);
-        //bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.black));
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_nav);
+        List<Integer> navGraphsIds = Arrays.asList(R.navigation.feed, R.navigation.search, R.navigation.post, R.navigation.profile);
 
-        BottomNavigationBar bottomNavigationBar = (BottomNavigationBar) findViewById(R.id.nav_view);
-        bottomNavigationBar.setBarBackgroundColor(R.color.black);
+        LiveData<NavController> controller = NavigationExtensionsKt.setupWithNavController(bottomNavigationView,
+                navGraphsIds, 
+                getSupportFragmentManager(), 
+                R.id.nav_host_container, 
+                getIntent());
 
-        bottomNavigationBar
-                .addItem(new BottomNavigationItem(R.drawable.ic_baseline_home_24, "Feed"))
-                .addItem(new BottomNavigationItem(R.drawable.ic_baseline_search_24, "Pesquisa"))
-                .addItem(new BottomNavigationItem(R.drawable.ic_baseline_add_box_24, "Postagem"))
-                .addItem(new BottomNavigationItem(R.drawable.ic_baseline_person_24, "Perfil"))
-                .setFirstSelectedPosition(0)
-                .initialise();
-
-        bottomNavigationBar.setTabSelectedListener(new BottomNavigationBar.OnTabSelectedListener(){
-            @Override
-            public void onTabSelected(int position) {
-                switch (position) {
-                    case 0:
-                        fm.beginTransaction().hide(active).show(feedFragment).commit();
-                        active = feedFragment;
-                        return;
-
-                    case 1:
-                        fm.beginTransaction().hide(active).show(pesquisaFragment).commit();
-                        active = pesquisaFragment;
-                        return;
-
-                    case 2:
-                        fm.beginTransaction().hide(active).show(postagemFragment).commit();
-                        active = postagemFragment;
-                        return;
-
-                    case 3:
-                        fm.beginTransaction().hide(active).show(perfilFragment).commit();
-                        active = perfilFragment;
-
-                }
+        controller.observe(this, new Observer() {
+            public void onChanged(Object var1) {
+                this.onChanged((NavController)var1);
             }
-            @Override
-            public void onTabUnselected(int position) {
-            }
-            @Override
-            public void onTabReselected(int position) {
+
+            public final void onChanged(NavController navController) {
+                NavigationUI.setupActionBarWithNavController(MainActivity.this, navController);
             }
         });
-
-
-
+        this.currentNavController = controller;
 
 
         /*
@@ -169,6 +119,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
+        if (currentNavController != null) {
+            NavController navController = currentNavController.getValue();
+            if (navController != null) {
+                return navController.navigateUp();
+            }
+        }
         return false;
     }
+
 }

@@ -1,6 +1,7 @@
 package com.cursoandroid.gabriel.instagramclone.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class Post implements Serializable, Comparable<Post>{
 
@@ -70,6 +71,19 @@ public class Post implements Serializable, Comparable<Post>{
         if(this.id < otherPost.getId()) return 1;
         else if (this.id > otherPost.getId()) return -1;
         else return 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Post post = (Post) o;
+        return Objects.equals(id, post.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
 

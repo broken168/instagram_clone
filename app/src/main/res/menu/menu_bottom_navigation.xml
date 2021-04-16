@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:id="@+id/navigation_feed"
+    <item android:id="@+id/feed"
         android:title="Home"
         android:icon="@drawable/ic_baseline_home_24"
         />
 
-    <item android:id="@+id/navigation_search"
+    <item android:id="@+id/search"
         android:title="Pesquisa"
         android:icon="@drawable/ic_baseline_search_24"
         />
-    <item android:id="@+id/navigation_post"
+    <item android:id="@+id/post"
         android:title="Postagem"
         android:icon="@drawable/ic_baseline_add_box_24"
         />
-    <item android:id="@+id/navigation_profile"
+    <item android:id="@+id/profile"
         android:title="Perfil"
         android:icon="@drawable/ic_white_person_24"
         />

@@ -15,8 +15,6 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
 
-import coil.Coil;
-import coil.util.CoilUtils;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;

@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+simport androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -24,6 +25,7 @@ import com.cursoandroid.gabriel.instagramclone.adapter.AdapterFeed;
 import com.cursoandroid.gabriel.instagramclone.helper.Configurators;
 import com.cursoandroid.gabriel.instagramclone.helper.Dialog;
 import com.cursoandroid.gabriel.instagramclone.helper.FeedCounter;
+import com.cursoandroid.gabriel.instagramclone.helper.MyDiffCallback;
 import com.cursoandroid.gabriel.instagramclone.model.Post;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
 import com.cursoandroid.gabriel.instagramclone.search.PostSearch;
@@ -52,7 +54,8 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     private SwipeRefreshLayout swipeRefreshLayout;
 
-    private List<Post> postList = new ArrayList<>();
+    private List<Post> newPostList = new ArrayList<>();
+    private List<Post> oldPostList = new ArrayList<>();
 
     private Retrofit retrofit;
     private PostService postService;
@@ -128,7 +131,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         getActivity().getSupportFragmentManager();
         configRetrofit();
 
-        adapterFeed = new AdapterFeed(postList, retrofit, view, activity);
+        adapterFeed = new AdapterFeed(newPostList, retrofit, view, activity);
         recyclerFeed.setHasFixedSize(true);
         recyclerFeed.setLayoutManager(new LinearLayoutManager(activity));
         recyclerFeed.setAdapter(adapterFeed);
@@ -169,7 +172,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
 
     private void listarFeed(){
-        postList.clear();
         List<Long> list = currentUser.getFollowing();
         StringBuilder ids = new StringBuilder();
         for(int i = 0; i < list.size(); i++){
@@ -189,16 +191,22 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             @Override
             public void onResponse(Call<PostSearch> call, Response<PostSearch> response) {
                 if(response.isSuccessful()){
+                    oldPostList.clear();
+                    oldPostList.addAll(newPostList);
+                    newPostList.clear();
                     for (UserProfile user : response.body().getContent()){
                         for(Post post : user.getPosts()){
                             post.setUsername(user.getUsername());
                             post.setUserImageUrl(user.getImageUrl());
-                            postList.add(post);
+                            newPostList.add(post);
                         }
                     }
+                    if ( newPostList != null && newPostList.size() > 0 ){
+                        Collections.sort(newPostList);
+                        updateList(oldPostList,  newPostList);
+                    }
+
                     if(swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(false);
-                    if ( postList.size() > 0 ) Collections.sort(postList);
-                    adapterFeed.notifyDataSetChanged();
 
                 }
                 else {
@@ -214,6 +222,11 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             @Override
             public void onFailure(Call<PostSearch> call, Throwable t) {
                 Toast.makeText(activity, "Failure: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+
+            public void updateList(List<Post> oldList, List<Post> newList) {
+                DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new MyDiffCallback(oldList, newList));
+                diffResult.dispatchUpdatesTo(adapterFeed);
             }
         });
     }
