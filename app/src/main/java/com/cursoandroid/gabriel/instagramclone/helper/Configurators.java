@@ -22,6 +22,7 @@ public class Configurators {
                 return chain.proceed(newRequest);
             }
         }).build();
+
         return new Retrofit.Builder().baseUrl("http://189.84.65.150:8080").client(client).addConverterFactory(GsonConverterFactory.create()).build();
     }
 }

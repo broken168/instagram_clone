@@ -24,7 +24,6 @@ import com.cursoandroid.gabriel.instagramclone.adapter.AdapterMiniaturas;
 import com.cursoandroid.gabriel.instagramclone.helper.Configurators;
 import com.cursoandroid.gabriel.instagramclone.helper.Converters;
 import com.cursoandroid.gabriel.instagramclone.helper.Dialog;
-import com.cursoandroid.gabriel.instagramclone.helper.MySharedPreferences;
 import com.cursoandroid.gabriel.instagramclone.helper.RecyclerItemClickListener;
 import com.cursoandroid.gabriel.instagramclone.model.Post;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
@@ -39,19 +38,14 @@ import com.zomato.photofilters.utils.ThumbnailsManager;
 
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import dmax.dialog.SpotsDialog;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class FiltroActivity extends AppCompatActivity {
 
@@ -204,7 +198,7 @@ public class FiltroActivity extends AppCompatActivity {
         if(textDescricao.getText() != null) {
             Bitmap bmImage = ((BitmapDrawable) imagefotoEscolhida.getDrawable()).getBitmap();
 
-            Call<Void> call = fileService.uploadFile(Converters.converterBitmapToMultipartBody(bmImage), "post_image");
+            Call<Void> call = fileService.uploadFile(Converters.convertBitmapToMultipartBody(bmImage), "post_image");
             call.enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {

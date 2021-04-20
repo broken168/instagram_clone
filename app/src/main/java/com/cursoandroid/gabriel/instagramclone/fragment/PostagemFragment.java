@@ -21,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.cursoandroid.gabriel.instagramclone.R;
@@ -125,9 +126,12 @@ public class PostagemFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                if(i.resolveActivity(activity.getPackageManager()) != null){
+                try {
                     startActivityForResult(i, SELECAO_CAMERA);
+                }catch (Exception e){
+                    Toast.makeText(activity, e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
+
             }
         });
 
@@ -135,8 +139,10 @@ public class PostagemFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                if(i.resolveActivity(activity.getPackageManager()) != null){
+                try{
                     startActivityForResult(i, SELECAO_GALERIA);
+                }catch (Exception e){
+                    Toast.makeText(activity, e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
         });

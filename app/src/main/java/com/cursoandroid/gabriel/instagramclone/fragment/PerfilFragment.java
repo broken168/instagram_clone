@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.navigation.fragment.FragmentKt;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -26,6 +28,7 @@ import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloade
 import com.cursoandroid.gabriel.instagramclone.model.Post;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
 import com.cursoandroid.gabriel.instagramclone.search.PostSearch;
+import com.cursoandroid.gabriel.instagramclone.services.PostService;
 import com.cursoandroid.gabriel.instagramclone.services.UserServices;
 import com.google.android.material.imageview.ShapeableImageView;
 import org.json.JSONObject;
@@ -43,7 +46,7 @@ import static android.content.ContentValues.TAG;
  * Use the {@link PerfilFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class PerfilFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
+public class PerfilFragment extends Fragment {
 
     private TextView textPublicacoes, textSeguidores, textSeguindo;
     private ImageButton buttonEditarPerfil;
@@ -53,11 +56,8 @@ public class PerfilFragment extends Fragment implements SwipeRefreshLayout.OnRef
 
     private Retrofit retrofit;
     private UserServices userServices;
+    private PostService postService;
     private UserProfile currentUser;
-
-    private Activity activity;
-
-    private SwipeRefreshLayout swipeRefreshLayout;
 
     private ProgressBar progressBarImagePerfil;
 
@@ -75,12 +75,12 @@ public class PerfilFragment extends Fragment implements SwipeRefreshLayout.OnRef
         // Required empty public constructor
     }
 
+    private FragmentActivity activity;
+
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        if( context instanceof Activity){
-            activity = (Activity) context;
-        }
+        activity = (FragmentActivity) context;
     }
 
     /**
@@ -111,17 +111,19 @@ public class PerfilFragment extends Fragment implements SwipeRefreshLayout.OnRef
     }
 
     @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        carregarInformacoesUsuario();
+
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_perfil, container, false);
         inicializarComponentes(view);
         configRetrofit();
-
-        swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
-        swipeRefreshLayout.setOnRefreshListener(this);
-
-        carregarInformacoesUsuario();
 
         buttonEditarPerfil.setOnClickListener(v ->
                 FragmentKt.findNavController(PerfilFragment.this).navigate(R.id.action_profile_to_edit_profile));
@@ -132,6 +134,7 @@ public class PerfilFragment extends Fragment implements SwipeRefreshLayout.OnRef
     private void configRetrofit() {
         retrofit = Configurators.retrofitConfigurator(activity);
         userServices = retrofit.create(UserServices.class);
+        postService = retrofit.create(PostService.class);
     }
 
     public void inicializarComponentes(View view){
@@ -163,7 +166,6 @@ public class PerfilFragment extends Fragment implements SwipeRefreshLayout.OnRef
                         Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
-                if ( swipeRefreshLayout.isRefreshing() ) swipeRefreshLayout.setRefreshing(false);
             }
             @Override
             public void onFailure(Call<UserProfile> call, Throwable t) {
@@ -174,25 +176,24 @@ public class PerfilFragment extends Fragment implements SwipeRefreshLayout.OnRef
 
     private void loadImagesPosts(Long id) {
 
-        Call<PostSearch> call = userServices.getPostsByIds(id.toString());
+        Call<PostSearch> call = postService.getPostsByUserId(id);
         call.enqueue(new Callback<PostSearch>() {
             @Override
             public void onResponse(Call<PostSearch> call, Response<PostSearch> response) {
 
-                if(response.isSuccessful()){
+                if (response.isSuccessful()) {
 
-                    List<Post> postList = response.body().getContent().get(0).getPosts();
+                    PostSearch postSearch = response.body();
 
                     List<String> imagesUrl = new ArrayList<>();
-                    for(Post post : postList) {
+                    for (Post post : postSearch.getContent()) {
                         imagesUrl.add(post.getImageUrl());
                     }
-
-                    textPublicacoes.setText(String.valueOf(postList.size()));
-                    adapterGrid = new AdapterGrid(activity, R.layout.grid_postagem, imagesUrl );
-                    gridViewPerfil.setAdapter( adapterGrid );
-
-
+                    if(imagesUrl.size() > 0) {
+                        textPublicacoes.setText(String.valueOf(imagesUrl.size()));
+                        adapterGrid = new AdapterGrid(activity, R.layout.grid_postagem, imagesUrl);
+                        gridViewPerfil.setAdapter(adapterGrid);
+                    }
                 }
                 else {
                     try {
@@ -203,7 +204,6 @@ public class PerfilFragment extends Fragment implements SwipeRefreshLayout.OnRef
                     }
                 }
             }
-
             @Override
             public void onFailure(Call<PostSearch> call, Throwable t) {
                 Toast.makeText(activity, "Failure: " + t.getMessage(), Toast.LENGTH_SHORT).show();
@@ -228,24 +228,4 @@ public class PerfilFragment extends Fragment implements SwipeRefreshLayout.OnRef
 
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        Log.d(TAG, "onActivityCreated: criadaaaaa");
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    public void onRefresh() {
-        carregarInformacoesUsuario();
-    }
 }

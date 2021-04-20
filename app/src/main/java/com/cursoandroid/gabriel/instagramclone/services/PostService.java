@@ -1,4 +1,4 @@
-package com.cursoandroid.gabriel.instagramclone.services;
+ package com.cursoandroid.gabriel.instagramclone.services;
 
 import com.cursoandroid.gabriel.instagramclone.model.Post;
 import com.cursoandroid.gabriel.instagramclone.search.PostSearch;
@@ -18,5 +18,12 @@ public interface PostService {
     Call<Void> createPost(@Body Post post);
 
     @GET(value = "/posts/all")
-    Call<PostSearch> searchPost(@Query("ids") Long x);
+    Call<PostSearch> getPostsByUsersIds(@Query("ids") String ids, @Query("page") Integer page);
+
+    @GET(value = "/posts/user/{id}")
+    Call<PostSearch> getPostsByUserId(@Path("id") Long id);
+
+    @POST(value = "/posts/{id}")
+    Call<Void> like(@Path("id") Long id);
+
 }

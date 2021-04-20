@@ -8,6 +8,8 @@ public class Post implements Serializable, Comparable<Post>{
     private String description, imageUrl, username, userImageUrl;
     private Long id;
     private UserProfile userProfile;
+    private Boolean liked;
+    private Long likes;
 
     public Post() {
     }
@@ -64,6 +66,23 @@ public class Post implements Serializable, Comparable<Post>{
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public Long getLikes() {
+        return likes;
+    }
+
+    public void setLikes(Long likes) {
+        this.likes = likes;
+    }
+
+
+    public Boolean getLiked() {
+        return liked;
+    }
+
+    public void setLiked(Boolean liked) {
+        this.liked = liked;
     }
 
     @Override

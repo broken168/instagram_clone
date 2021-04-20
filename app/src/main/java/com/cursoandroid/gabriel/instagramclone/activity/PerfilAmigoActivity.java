@@ -22,10 +22,10 @@ import com.cursoandroid.gabriel.instagramclone.adapter.AdapterGrid;
 import com.cursoandroid.gabriel.instagramclone.helper.Configurators;
 import com.cursoandroid.gabriel.instagramclone.helper.Dialog;
 import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
-import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderPicasso;
 import com.cursoandroid.gabriel.instagramclone.model.Post;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
 import com.cursoandroid.gabriel.instagramclone.search.PostSearch;
+import com.cursoandroid.gabriel.instagramclone.services.PostService;
 import com.cursoandroid.gabriel.instagramclone.services.UserServices;
 import com.google.android.material.imageview.ShapeableImageView;
 
@@ -56,6 +56,7 @@ public class PerfilAmigoActivity extends AppCompatActivity implements SwipeRefre
 
     private Retrofit retrofit;
     private UserServices userServices;
+    private PostService postService;
 
     private AdapterGrid adapterGrid;
 
@@ -116,6 +117,7 @@ public class PerfilAmigoActivity extends AppCompatActivity implements SwipeRefre
     private void configRetrofit() {
         retrofit = Configurators.retrofitConfigurator(getApplicationContext());
         userServices = retrofit.create(UserServices.class);
+        postService = retrofit.create(PostService.class);
     }
 
     public void inicializarComponentes(){
@@ -136,25 +138,24 @@ public class PerfilAmigoActivity extends AppCompatActivity implements SwipeRefre
         int tamanhoImagem = tamanhoGrid / 3;
         gridViewPerfil.setColumnWidth( tamanhoImagem );
 
-        Call<PostSearch> call = userServices.getPostsByIds(friendUser.getId().toString());
+        Call<PostSearch> call = postService.getPostsByUserId(friendUser.getId());
         call.enqueue(new Callback<PostSearch>() {
             @Override
             public void onResponse(Call<PostSearch> call, Response<PostSearch> response) {
 
-                if(response.isSuccessful()){
+                if (response.isSuccessful()) {
 
-                    List<Post> postList = response.body().getContent().get(0).getPosts();
+                    PostSearch postSearch = response.body();
 
                     List<String> imagesUrl = new ArrayList<>();
-                    for(Post post : postList) {
+                    for (Post post : postSearch.getContent()) {
                         imagesUrl.add(post.getImageUrl());
                     }
-
-                    textPublicacoes.setText(String.valueOf(postList.size()));
-                    adapterGrid = new AdapterGrid(getApplicationContext(), R.layout.grid_postagem, imagesUrl );
-                    gridViewPerfil.setAdapter( adapterGrid );
-
-
+                    if(imagesUrl.size() > 0) {
+                        textPublicacoes.setText(String.valueOf(imagesUrl.size()));
+                        adapterGrid = new AdapterGrid(getApplicationContext(), R.layout.grid_postagem, imagesUrl);
+                        gridViewPerfil.setAdapter(adapterGrid);
+                    }
                 }
                 else {
                     try {

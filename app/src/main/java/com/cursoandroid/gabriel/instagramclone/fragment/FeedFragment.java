@@ -1,16 +1,13 @@
 package com.cursoandroid.gabriel.instagramclone.fragment;
 
-import android.app.Activity;
 import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-simport androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -34,7 +31,6 @@ import com.cursoandroid.gabriel.instagramclone.services.UserServices;
 import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -46,7 +42,7 @@ import retrofit2.Retrofit;
  * Use the {@link FeedFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener{
+public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener, FeedCounter{
 
 
     private RecyclerView recyclerFeed;
@@ -60,6 +56,10 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private Retrofit retrofit;
     private PostService postService;
     private UserServices userServices;
+
+    private int countPage = 0;
+    private int currentPage = 0;
+    private PostSearch postSearch;
 
     private UserProfile currentUser;
     private final String TAG = "FeedFragment";
@@ -116,8 +116,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     }
 
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -128,10 +126,9 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
         swipeRefreshLayout.setOnRefreshListener(this);
 
-        getActivity().getSupportFragmentManager();
         configRetrofit();
 
-        adapterFeed = new AdapterFeed(newPostList, retrofit, view, activity);
+        adapterFeed = new AdapterFeed(newPostList, retrofit, view, activity, this);
         recyclerFeed.setHasFixedSize(true);
         recyclerFeed.setLayoutManager(new LinearLayoutManager(activity));
         recyclerFeed.setAdapter(adapterFeed);
@@ -144,14 +141,14 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         userServices = retrofit.create(UserServices.class);
     }
 
-    private void getCurrentUser(){
+    private void getCurrentUser(boolean isRefresh){
         Call<UserProfile> call = userServices.getCurrentUser();
         call.enqueue(new Callback<UserProfile>() {
             @Override
             public void onResponse(Call<UserProfile> call, Response<UserProfile> response) {
                 if(response.isSuccessful()){
                     currentUser = response.body();
-                    listarFeed();
+                    listarFeed(isRefresh);
                 }
                 else {
                     try {
@@ -171,7 +168,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
 
-    private void listarFeed(){
+    private void listarFeed(boolean isRefresh){
         List<Long> list = currentUser.getFollowing();
         StringBuilder ids = new StringBuilder();
         for(int i = 0; i < list.size(); i++){
@@ -180,33 +177,39 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 ids.append(",");
             }
         }
-        if(!ids.toString().isEmpty()) getPostsByIds(ids.toString());
-        else Toast.makeText(activity, "Você não está seguindo ninguém", Toast.LENGTH_SHORT).show();
+        if(!ids.toString().isEmpty()) getPostsByIds(ids.toString(), isRefresh);
+        else {
+            Toast.makeText(activity, "Você não está seguindo ninguém", Toast.LENGTH_SHORT).show();
+            if(swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(false);
+        }
 
     }
 
-    private void getPostsByIds(String ids) {
-        Call<PostSearch> call = userServices.getPostsByIds(ids);
+    private void getPostsByIds(String ids, boolean isRefresh) {
+
+        if(isRefresh) currentPage = 0;
+        Call<PostSearch> call = postService.getPostsByUsersIds(ids, currentPage);
         call.enqueue(new Callback<PostSearch>() {
             @Override
             public void onResponse(Call<PostSearch> call, Response<PostSearch> response) {
                 if(response.isSuccessful()){
-                    oldPostList.clear();
-                    oldPostList.addAll(newPostList);
-                    newPostList.clear();
-                    for (UserProfile user : response.body().getContent()){
-                        for(Post post : user.getPosts()){
-                            post.setUsername(user.getUsername());
-                            post.setUserImageUrl(user.getImageUrl());
-                            newPostList.add(post);
-                        }
-                    }
-                    if ( newPostList != null && newPostList.size() > 0 ){
-                        Collections.sort(newPostList);
-                        updateList(oldPostList,  newPostList);
-                    }
+                    postSearch = response.body();
 
-                    if(swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(false);
+                    if(isRefresh) {
+                        oldPostList.clear();
+                        oldPostList.addAll(newPostList);
+                        newPostList.clear();
+
+                        newPostList.addAll(response.body().getContent());
+
+                        updateList(oldPostList, newPostList);
+
+                    }else{
+                        newPostList.addAll(response.body().getContent());
+                        adapterFeed.notifyItemRangeInserted( (10 * (currentPage+1) ) - 1, newPostList.size() );
+                    }
+                    if (swipeRefreshLayout.isRefreshing())
+                        swipeRefreshLayout.setRefreshing(false);
 
                 }
                 else {
@@ -234,12 +237,27 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        getCurrentUser();
+        getCurrentUser(false);
     }
 
     @Override
     public void onRefresh() {
-        getCurrentUser();
+        getCurrentUser(true);
+    }
+
+    //me perdoa futuro caso vc n entenda porra nenhuma q está programado aqui
+    //get the bindedView position of AdapterFeed
+    @Override
+    public void count(int position) {
+        if(postSearch != null &&
+                !postSearch.isLast() &&
+                position == ( postSearch.getNumberOfElements() * (currentPage+1) - 5)
+                )
+        {
+            Toast.makeText(activity, "atualizado", Toast.LENGTH_SHORT).show();
+            currentPage++;
+            listarFeed(false);
+        }
     }
 
 }

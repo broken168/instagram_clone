@@ -35,6 +35,4 @@ public interface UserServices {
     @POST(value = "/users/remove_follow/{id}")
     Call<Void> removeFollow(@Path("id") Long id);
 
-    @GET(value = "/users/posts")
-    Call<PostSearch> getPostsByIds(@Query("ids") String ids);
 }

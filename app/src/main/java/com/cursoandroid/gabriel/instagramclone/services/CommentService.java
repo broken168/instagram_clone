@@ -16,4 +16,5 @@ public interface CommentService {
 
     @POST(value = "/comment/{id}")
     Call<Void> addComment(@Body Comment comment, @Path("id") Long postId);
+
 }

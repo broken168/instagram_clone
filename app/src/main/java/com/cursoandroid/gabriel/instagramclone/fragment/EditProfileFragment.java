@@ -1,17 +1,22 @@
-package com.cursoandroid.gabriel.instagramclone.activity;
-
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
+package com.cursoandroid.gabriel.instagramclone.fragment;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+
 import android.provider.MediaStore;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -23,7 +28,6 @@ import com.cursoandroid.gabriel.instagramclone.helper.Converters;
 import com.cursoandroid.gabriel.instagramclone.helper.Dialog;
 import com.cursoandroid.gabriel.instagramclone.helper.Permissao;
 import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
-import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderPicasso;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
 import com.cursoandroid.gabriel.instagramclone.services.FileService;
 import com.cursoandroid.gabriel.instagramclone.services.UserServices;
@@ -32,15 +36,16 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import org.json.JSONObject;
 
-
-
 import dmax.dialog.SpotsDialog;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-public class EditarPerfilActivity extends AppCompatActivity {
+import static android.app.Activity.RESULT_OK;
+
+
+public class EditProfileFragment extends Fragment {
 
     private ShapeableImageView imageEditarPerfil;
     private TextView textAlterarFoto;
@@ -59,63 +64,60 @@ public class EditarPerfilActivity extends AppCompatActivity {
             Manifest.permission.READ_EXTERNAL_STORAGE,
     };
 
-    private boolean openByDialog = false;
+
+
+    public EditProfileFragment() {
+        // Required empty public constructor
+    }
+
+
+    private FragmentActivity activity;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_editar_perfil);
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        activity = (FragmentActivity) context;
+    }
 
-        inicializarComponentes();
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.activity_editar_perfil, container, false);
+        inicializarComponentes(view);
+        return view;
+    }
 
-        Permissao.validarPermissoes(permissoesNecessarias, EditarPerfilActivity.this, 2);
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        Permissao.validarPermissoes(permissoesNecessarias, activity, 2);
 
         configRetrofit();
         recuperarDadosUsuario();
 
         dialog = new SpotsDialog.Builder()
-                .setContext(this)
-                .setMessage("Atualizando dados...")
+                .setContext(activity)
+                .setMessage("Carregando dados...")
                 .setCancelable(false)
                 .build();
 
-        Bundle bundle = getIntent().getExtras();
-        if(bundle != null){
-            openByDialog = bundle.getBoolean("openByDialog");
-        }
-
-        Toolbar toolbar = findViewById(R.id.toolbarAlternativa);
-        toolbar.setTitleTextColor(getResources().getColor(R.color.white));
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Editar perfil");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_baseline_close_24);
-
-
-        buttonSalvar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                if(!editNomePerfil.getText().toString().isEmpty()) {
-                    currentUser.setUsername(editNomePerfil.getText().toString());
-                    updateUserImage();
-                }else{
-                    Toast.makeText(EditarPerfilActivity.this, "Preencha o usuário", Toast.LENGTH_SHORT).show();
-                }
-
+        buttonSalvar.setOnClickListener(view -> {
+            if(!editNomePerfil.getText().toString().isEmpty()) {
+                currentUser.setUsername(editNomePerfil.getText().toString());
+                updateUserImage();
+            }else{
+                Toast.makeText(activity, "Preencha o usuário", Toast.LENGTH_SHORT).show();
             }
         });
-
-        textAlterarFoto.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                if( i.resolveActivity(getPackageManager()) != null){
-                    startActivityForResult(i, SELECAO_GALERIA);
-                }
-            }
+        textAlterarFoto.setOnClickListener(v ->
+        {
+            Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(i, SELECAO_GALERIA);
         });
     }
+
 
     private void recuperarDadosUsuario() {
         Call<UserProfile> call = userServices.getCurrentUser();
@@ -129,15 +131,15 @@ public class EditarPerfilActivity extends AppCompatActivity {
                     progressBarImagePerfil.setVisibility(View.GONE);
                     try {
                         JSONObject json = new JSONObject(response.errorBody().string());
-                        Dialog.dialogError(EditarPerfilActivity.this, json.getString("message"), json.getString("details"));
+                        Dialog.dialogError(activity, json.getString("message"), json.getString("details"));
                     } catch (Exception e) {
-                        Toast.makeText(EditarPerfilActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
             }
             @Override
             public void onFailure(Call<UserProfile> call, Throwable t) {
-                Toast.makeText(EditarPerfilActivity.this, "Failure: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(activity, "Failure: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
 
@@ -149,7 +151,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
 
         String url = currentUser.getImageUrl();
         if(url != null && !url.equals("")) {
-            ImageDownloaderGlide.loadImage(url, getApplicationContext(), progressBarImagePerfil, imageEditarPerfil);
+            ImageDownloaderGlide.loadImage(url, activity, progressBarImagePerfil, imageEditarPerfil);
         }else {
             progressBarImagePerfil.setVisibility(View.GONE);
         }
@@ -158,13 +160,15 @@ public class EditarPerfilActivity extends AppCompatActivity {
 
 
     private void configRetrofit() {
-        Retrofit retrofit = Configurators.retrofitConfigurator(getApplicationContext());
+        Retrofit retrofit = Configurators.retrofitConfigurator(activity);
         fileService = retrofit.create(FileService.class);
         userServices = retrofit.create(UserServices.class);
+
     }
 
+
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if(resultCode == RESULT_OK){
@@ -172,7 +176,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
 
                 if (requestCode == SELECAO_GALERIA) {
                     Uri localImagemSelecionada = data.getData();
-                    imageRecuperadaGaleria = MediaStore.Images.Media.getBitmap(getContentResolver(), localImagemSelecionada);
+                    imageRecuperadaGaleria = MediaStore.Images.Media.getBitmap(activity.getContentResolver(), localImagemSelecionada);
                 }
 
                 if(imageRecuperadaGaleria != null){
@@ -188,7 +192,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
     private void updateUserImage() {
         dialog.show();
         if(imageRecuperadaGaleria != null) {
-            Call<Void> call = fileService.uploadFile(Converters.converterBitmapToMultipartBody(imageRecuperadaGaleria), "profile_image");
+            Call<Void> call = fileService.uploadFile(Converters.convertBitmapToMultipartBody(imageRecuperadaGaleria), "profile_image");
             call.enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
@@ -198,16 +202,16 @@ public class EditarPerfilActivity extends AppCompatActivity {
                     }else{
                         try {
                             JSONObject json = new JSONObject(response.errorBody().string());
-                            Dialog.dialogError(getApplicationContext(), json.getString("message"), json.getString("details"));
+                            Dialog.dialogError(activity, json.getString("message"), json.getString("details"));
                         }catch (Exception e){
-                            Toast.makeText(EditarPerfilActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(activity, e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     }
                 }
 
                 @Override
                 public void onFailure(Call<Void> call, Throwable t) {
-                    Toast.makeText(EditarPerfilActivity.this, "Falha ao atualizar imagem: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(activity, "Falha ao atualizar imagem: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                     updateUserInfos();
                 }
             });
@@ -223,13 +227,13 @@ public class EditarPerfilActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if(response.isSuccessful()){
-                    Toast.makeText(EditarPerfilActivity.this, "Infos atualizadas com sucesso!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(activity, "Infos atualizadas com sucesso!", Toast.LENGTH_SHORT).show();
                 }else{
                     try {
                         JSONObject json = new JSONObject(response.errorBody().string());
-                        Dialog.dialogError(EditarPerfilActivity.this, json.getString("message"), json.getString("details"));
+                        Dialog.dialogError(activity, json.getString("message"), json.getString("details"));
                     } catch (Exception e) {
-                        Toast.makeText(EditarPerfilActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
                 close();
@@ -237,35 +241,28 @@ public class EditarPerfilActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                Toast.makeText(EditarPerfilActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity, t.getMessage(), Toast.LENGTH_SHORT).show();
                 close();
 
             }
             private void close() {
-                if(openByDialog){
-                    finish();
-                    startActivity(new Intent(EditarPerfilActivity.this, MainActivity.class));
-                }else {
-                    finish();
-                }
                 dialog.dismiss();
+                activity.getSupportFragmentManager().popBackStack();
             }
         });
     }
 
-    public void inicializarComponentes(){
-        imageEditarPerfil = findViewById(R.id.imageEditarPerfil);
-        textAlterarFoto = findViewById(R.id.textAlterarFoto);
-        editEmailPerfil = findViewById(R.id.editEmailPerfil);
-        editNomePerfil = findViewById(R.id.editNomePerfil);
-        progressBarImagePerfil = findViewById(R.id.progressBarEditarPerfil);
-        buttonSalvar = findViewById(R.id.buttonSalvarAlteracoesPerfil);
+    public void inicializarComponentes(View view){
+        imageEditarPerfil = view.findViewById(R.id.imageEditarPerfil);
+        textAlterarFoto = view.findViewById(R.id.textAlterarFoto);
+        editEmailPerfil = view.findViewById(R.id.editEmailPerfil);
+        editNomePerfil = view.findViewById(R.id.editNomePerfil);
+        progressBarImagePerfil = view.findViewById(R.id.progressBarEditarPerfil);
+        buttonSalvar = view.findViewById(R.id.buttonSalvarAlteracoesPerfil);
         editEmailPerfil.setFocusable(false);
+
     }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        finish();
-        return false;
-    }
+
+
 }

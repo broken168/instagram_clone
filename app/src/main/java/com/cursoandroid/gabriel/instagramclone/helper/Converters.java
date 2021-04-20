@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.util.List;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -13,7 +14,7 @@ import retrofit2.Response;
 
 public class Converters {
 
-    public static MultipartBody.Part converterBitmapToMultipartBody(Bitmap bmImage){
+    public static MultipartBody.Part convertBitmapToMultipartBody(Bitmap bmImage){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bmImage.compress(Bitmap.CompressFormat.JPEG, 50, baos);
 
@@ -28,7 +29,7 @@ public class Converters {
 
     }
 
-    public static String converterErrorBodyToString(Response response){
+    public static String convertErrorBodyToString(Response response){
         try {
             JSONObject jObjError = new JSONObject(response.errorBody().string());
             return jObjError.getString("message");
@@ -37,5 +38,7 @@ public class Converters {
             return e.getMessage();
         }
     }
+
+
 
 }
