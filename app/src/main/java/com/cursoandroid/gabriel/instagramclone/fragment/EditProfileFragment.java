@@ -127,14 +127,6 @@ public class EditProfileFragment extends Fragment {
                 if(response.isSuccessful()){
                     currentUser = response.body();
                     loadUserData();
-                }else{
-                    progressBarImagePerfil.setVisibility(View.GONE);
-                    try {
-                        JSONObject json = new JSONObject(response.errorBody().string());
-                        Dialog.dialogError(activity, json.getString("message"), json.getString("details"));
-                    } catch (Exception e) {
-                        Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
                 }
             }
             @Override
@@ -199,13 +191,6 @@ public class EditProfileFragment extends Fragment {
                     if(response.isSuccessful()){
                         currentUser.setImageUrl(response.headers().get("Location"));
                         updateUserInfos();
-                    }else{
-                        try {
-                            JSONObject json = new JSONObject(response.errorBody().string());
-                            Dialog.dialogError(activity, json.getString("message"), json.getString("details"));
-                        }catch (Exception e){
-                            Toast.makeText(activity, e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
                     }
                 }
 
@@ -228,13 +213,6 @@ public class EditProfileFragment extends Fragment {
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if(response.isSuccessful()){
                     Toast.makeText(activity, "Infos atualizadas com sucesso!", Toast.LENGTH_SHORT).show();
-                }else{
-                    try {
-                        JSONObject json = new JSONObject(response.errorBody().string());
-                        Dialog.dialogError(activity, json.getString("message"), json.getString("details"));
-                    } catch (Exception e) {
-                        Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
                 }
                 close();
             }

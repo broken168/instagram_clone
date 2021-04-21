@@ -108,13 +108,6 @@ public class LoginActivity extends AppCompatActivity {
                         finish();
                         startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     }
-                } else {
-                    try {
-                        JSONObject json = new JSONObject(response.errorBody().string());
-                        Dialog.dialogError(LoginActivity.this, json.getString("message"), json.getString("details"));
-                    } catch (Exception e) {
-                        Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
                 }
                 dialog.dismiss();
             }

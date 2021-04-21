@@ -21,9 +21,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.cursoandroid.gabriel.instagramclone.R;
+import com.cursoandroid.gabriel.instagramclone.activity.PerfilAmigoActivity;
 import com.cursoandroid.gabriel.instagramclone.adapter.AdapterGrid;
 import com.cursoandroid.gabriel.instagramclone.helper.Configurators;
 import com.cursoandroid.gabriel.instagramclone.helper.Dialog;
+import com.cursoandroid.gabriel.instagramclone.helper.FeedCounter;
 import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
 import com.cursoandroid.gabriel.instagramclone.model.Post;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
@@ -46,18 +48,20 @@ import static android.content.ContentValues.TAG;
  * Use the {@link PerfilFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class PerfilFragment extends Fragment {
+public class PerfilFragment extends Fragment implements FeedCounter {
 
     private TextView textPublicacoes, textSeguidores, textSeguindo;
     private ImageButton buttonEditarPerfil;
     private ShapeableImageView imgPerfil;
     public GridView gridViewPerfil;
     private AdapterGrid adapterGrid;
+    private PostSearch postSearch;
+    private final List<String> imagesUrl = new ArrayList<>();
 
-    private Retrofit retrofit;
     private UserServices userServices;
     private PostService postService;
     private UserProfile currentUser;
+    private int currentPage = 0;
 
     private ProgressBar progressBarImagePerfil;
 
@@ -92,7 +96,7 @@ public class PerfilFragment extends Fragment {
      * @return A new instance of fragment PerfilFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static PerfilFragment newInstance(String param1, String param2) {
+    public static PerfilFragment newInstance(String param1, String param2){
         PerfilFragment fragment = new PerfilFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
@@ -125,6 +129,9 @@ public class PerfilFragment extends Fragment {
         inicializarComponentes(view);
         configRetrofit();
 
+        adapterGrid = new AdapterGrid(activity, R.layout.grid_postagem, imagesUrl, PerfilFragment.this);
+        gridViewPerfil.setAdapter(adapterGrid);
+
         buttonEditarPerfil.setOnClickListener(v ->
                 FragmentKt.findNavController(PerfilFragment.this).navigate(R.id.action_profile_to_edit_profile));
 
@@ -132,7 +139,7 @@ public class PerfilFragment extends Fragment {
     }
 
     private void configRetrofit() {
-        retrofit = Configurators.retrofitConfigurator(activity);
+        Retrofit retrofit = Configurators.retrofitConfigurator(activity);
         userServices = retrofit.create(UserServices.class);
         postService = retrofit.create(PostService.class);
     }
@@ -157,14 +164,6 @@ public class PerfilFragment extends Fragment {
                     currentUser = response.body();
                     loadUserData();
                     loadImagesPosts(currentUser.getId());
-                }else{
-                    progressBarImagePerfil.setVisibility(View.GONE);
-                    try {
-                        JSONObject json = new JSONObject(response.errorBody().string());
-                        Dialog.dialogError(activity, json.getString("message"), json.getString("details"));
-                    } catch (Exception e) {
-                        Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
                 }
             }
             @Override
@@ -176,32 +175,22 @@ public class PerfilFragment extends Fragment {
 
     private void loadImagesPosts(Long id) {
 
-        Call<PostSearch> call = postService.getPostsByUserId(id);
+        Call<PostSearch> call = postService.getPostsByUserId(id, currentPage);
         call.enqueue(new Callback<PostSearch>() {
             @Override
             public void onResponse(Call<PostSearch> call, Response<PostSearch> response) {
 
                 if (response.isSuccessful()) {
+                    postSearch = response.body();
+                    textPublicacoes.setText(String.valueOf(postSearch.getTotalElements()));
+                    if(currentPage == 0 && imagesUrl.size() > 0)
+                        return;
 
-                    PostSearch postSearch = response.body();
-
-                    List<String> imagesUrl = new ArrayList<>();
                     for (Post post : postSearch.getContent()) {
                         imagesUrl.add(post.getImageUrl());
                     }
-                    if(imagesUrl.size() > 0) {
-                        textPublicacoes.setText(String.valueOf(imagesUrl.size()));
-                        adapterGrid = new AdapterGrid(activity, R.layout.grid_postagem, imagesUrl);
-                        gridViewPerfil.setAdapter(adapterGrid);
-                    }
-                }
-                else {
-                    try {
-                        JSONObject json = new JSONObject(response.errorBody().string());
-                        Dialog.dialogError(activity, json.getString("message"), json.getString("details"));
-                    } catch (Exception e) {
-                        Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
+                    adapterGrid.notifyDataSetChanged();
+
                 }
             }
             @Override
@@ -228,4 +217,16 @@ public class PerfilFragment extends Fragment {
 
     }
 
+    @Override
+    public void count(int position) {
+        if(postSearch != null &&
+                !postSearch.isLast() &&
+                position == ( postSearch.getNumberOfElements() * (currentPage+1) - 5)
+        )
+        {
+            Toast.makeText(activity, "atualizado", Toast.LENGTH_SHORT).show();
+            currentPage++;
+            carregarInformacoesUsuario();
+        }
+    }
 }

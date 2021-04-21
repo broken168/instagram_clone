@@ -57,7 +57,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private PostService postService;
     private UserServices userServices;
 
-    private int countPage = 0;
+
     private int currentPage = 0;
     private PostSearch postSearch;
 
@@ -150,14 +150,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                     currentUser = response.body();
                     listarFeed(isRefresh);
                 }
-                else {
-                    try {
-                        JSONObject json = new JSONObject(response.errorBody().string());
-                        Dialog.dialogError(activity, json.getString("message"), json.getString("details"));
-                    } catch (Exception e) {
-                        Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                }
             }
 
             @Override
@@ -180,6 +172,8 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         if(!ids.toString().isEmpty()) getPostsByIds(ids.toString(), isRefresh);
         else {
             Toast.makeText(activity, "Você não está seguindo ninguém", Toast.LENGTH_SHORT).show();
+            newPostList.clear();
+            adapterFeed.notifyDataSetChanged();
             if(swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(false);
         }
 
@@ -211,14 +205,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                     if (swipeRefreshLayout.isRefreshing())
                         swipeRefreshLayout.setRefreshing(false);
 
-                }
-                else {
-                    try {
-                        JSONObject json = new JSONObject(response.errorBody().string());
-                        Dialog.dialogError(activity, json.getString("message"), json.getString("details"));
-                    } catch (Exception e) {
-                        Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
                 }
             }
 

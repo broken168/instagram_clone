@@ -21,7 +21,7 @@ public interface PostService {
     Call<PostSearch> getPostsByUsersIds(@Query("ids") String ids, @Query("page") Integer page);
 
     @GET(value = "/posts/user/{id}")
-    Call<PostSearch> getPostsByUserId(@Path("id") Long id);
+    Call<PostSearch> getPostsByUserId(@Path("id") Long id, @Query("page")Integer page);
 
     @POST(value = "/posts/{id}")
     Call<Void> like(@Path("id") Long id);

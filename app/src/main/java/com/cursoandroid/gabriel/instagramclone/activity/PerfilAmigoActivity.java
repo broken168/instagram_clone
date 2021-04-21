@@ -9,6 +9,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
@@ -21,6 +22,7 @@ import com.cursoandroid.gabriel.instagramclone.R;
 import com.cursoandroid.gabriel.instagramclone.adapter.AdapterGrid;
 import com.cursoandroid.gabriel.instagramclone.helper.Configurators;
 import com.cursoandroid.gabriel.instagramclone.helper.Dialog;
+import com.cursoandroid.gabriel.instagramclone.helper.FeedCounter;
 import com.cursoandroid.gabriel.instagramclone.helper.downloaders.ImageDownloaderGlide;
 import com.cursoandroid.gabriel.instagramclone.model.Post;
 import com.cursoandroid.gabriel.instagramclone.model.UserProfile;
@@ -43,7 +45,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-public class PerfilAmigoActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
+public class PerfilAmigoActivity extends AppCompatActivity implements FeedCounter {
 
     private TextView textButtonAcaoPerfil;
     private ShapeableImageView imagemPerfil;
@@ -54,15 +56,15 @@ public class PerfilAmigoActivity extends AppCompatActivity implements SwipeRefre
     private UserProfile friendUser;
     private UserProfile currentUser;
 
-    private Retrofit retrofit;
     private UserServices userServices;
     private PostService postService;
+    private PostSearch postSearch;
+    private int currentPage = 0;
+    private List<String> imagesUrl = new ArrayList<>();
 
     private AdapterGrid adapterGrid;
 
     private TextView textPublicacoes, textSeguidores, textSeguindo;
-
-    private List<Post> postagens = new ArrayList<>();
 
     private AlertDialog dialog;
 
@@ -90,32 +92,21 @@ public class PerfilAmigoActivity extends AppCompatActivity implements SwipeRefre
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_baseline_close_24);
 
+        adapterGrid = new AdapterGrid(getApplicationContext(), R.layout.grid_postagem, imagesUrl, PerfilAmigoActivity.this);
+        gridViewPerfil.setAdapter(adapterGrid);
+
         Bundle bundle = getIntent().getExtras();
         if(bundle != null){
             retrieveUser(bundle.getLong("user"));
         }
 
-        buttonAcaoPerfil.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                saveFollow();
-            }
-        });
+        buttonAcaoPerfil.setOnClickListener(v -> saveFollow());
 
-        gridViewPerfil.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Post postagem = postagens.get(position);
-                Intent i = new Intent(getApplicationContext(), VisualizarPostagemActivity.class);
-                i.putExtra("postagem", postagem);
-                startActivity(i);
-            }
-        });
     }
 
 
     private void configRetrofit() {
-        retrofit = Configurators.retrofitConfigurator(getApplicationContext());
+        Retrofit retrofit = Configurators.retrofitConfigurator(PerfilAmigoActivity.this);
         userServices = retrofit.create(UserServices.class);
         postService = retrofit.create(PostService.class);
     }
@@ -138,35 +129,20 @@ public class PerfilAmigoActivity extends AppCompatActivity implements SwipeRefre
         int tamanhoImagem = tamanhoGrid / 3;
         gridViewPerfil.setColumnWidth( tamanhoImagem );
 
-        Call<PostSearch> call = postService.getPostsByUserId(friendUser.getId());
+        Call<PostSearch> call = postService.getPostsByUserId(friendUser.getId(), currentPage);
         call.enqueue(new Callback<PostSearch>() {
             @Override
             public void onResponse(Call<PostSearch> call, Response<PostSearch> response) {
 
                 if (response.isSuccessful()) {
-
-                    PostSearch postSearch = response.body();
-
-                    List<String> imagesUrl = new ArrayList<>();
+                    postSearch = response.body();
                     for (Post post : postSearch.getContent()) {
                         imagesUrl.add(post.getImageUrl());
                     }
-                    if(imagesUrl.size() > 0) {
-                        textPublicacoes.setText(String.valueOf(imagesUrl.size()));
-                        adapterGrid = new AdapterGrid(getApplicationContext(), R.layout.grid_postagem, imagesUrl);
-                        gridViewPerfil.setAdapter(adapterGrid);
-                    }
-                }
-                else {
-                    try {
-                        JSONObject json = new JSONObject(response.errorBody().string());
-                        Dialog.dialogError(PerfilAmigoActivity.this, json.getString("message"), json.getString("details"));
-                    } catch (Exception e) {
-                        Toast.makeText(PerfilAmigoActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
+                    adapterGrid.notifyDataSetChanged();
+                    textPublicacoes.setText(String.valueOf(postSearch.getTotalElements()));
                 }
             }
-
             @Override
             public void onFailure(Call<PostSearch> call, Throwable t) {
                 Toast.makeText(PerfilAmigoActivity.this, "Failure: " + t.getMessage(), Toast.LENGTH_SHORT).show();
@@ -186,14 +162,6 @@ public class PerfilAmigoActivity extends AppCompatActivity implements SwipeRefre
                     if(followVerification()) textButtonAcaoPerfil.setText("Seguindo");
                     else textButtonAcaoPerfil.setText("Seguir");
                 }
-                else {
-                    try {
-                        JSONObject json = new JSONObject(response.errorBody().string());
-                        Dialog.dialogError(PerfilAmigoActivity.this, json.getString("message"), json.getString("details"));
-                    } catch (Exception e) {
-                        Toast.makeText(PerfilAmigoActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                }
                 dialog.dismiss();
             }
 
@@ -205,7 +173,8 @@ public class PerfilAmigoActivity extends AppCompatActivity implements SwipeRefre
     }
 
     private boolean followVerification(){
-        return currentUser.getFollowing().contains(friendUser.getId());
+        following = currentUser.getFollowing().contains(friendUser.getId());
+        return following;
     }
 
     private void saveFollow(){
@@ -219,14 +188,6 @@ public class PerfilAmigoActivity extends AppCompatActivity implements SwipeRefre
                         textButtonAcaoPerfil.setText("Seguir");
                         Long number = (Long.parseLong( textSeguidores.getText().toString() ) - 1L);
                         textSeguidores.setText(String.valueOf(number));
-                    }
-                    else {
-                        try {
-                            JSONObject json = new JSONObject(response.errorBody().string());
-                            Dialog.dialogError(PerfilAmigoActivity.this, json.getString("message"), json.getString("details"));
-                        } catch (Exception e) {
-                            Toast.makeText(PerfilAmigoActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-                        }
                     }
                 }
 
@@ -246,14 +207,6 @@ public class PerfilAmigoActivity extends AppCompatActivity implements SwipeRefre
                         textButtonAcaoPerfil.setText("Seguindo");
                         Long number = (Long.parseLong( textSeguidores.getText().toString() ) + 1L);
                         textSeguidores.setText(String.valueOf(number));
-                    }
-                    else {
-                        try {
-                            JSONObject json = new JSONObject(response.errorBody().string());
-                            Dialog.dialogError(PerfilAmigoActivity.this, json.getString("message"), json.getString("details"));
-                        } catch (Exception e) {
-                            Toast.makeText(PerfilAmigoActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-                        }
                     }
                 }
                 @Override
@@ -275,14 +228,7 @@ public class PerfilAmigoActivity extends AppCompatActivity implements SwipeRefre
                     recuperarDadosUsuariosLogado();
                     carregarFotosPostagem();
                 }
-                else{
-                    try {
-                        JSONObject json = new JSONObject(response.errorBody().string());
-                        Dialog.dialogError(PerfilAmigoActivity.this, json.getString("message"), json.getString("details"));
-                    } catch (Exception e) {
-                        Toast.makeText(PerfilAmigoActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                }
+
             }
 
             @Override
@@ -312,11 +258,19 @@ public class PerfilAmigoActivity extends AppCompatActivity implements SwipeRefre
     @Override
     public boolean onSupportNavigateUp() {
         finish();
-        return false;
+        return true;
     }
 
     @Override
-    public void onRefresh() {
-
+    public void count(int position) {
+        if(postSearch != null &&
+                !postSearch.isLast() &&
+                position == ( postSearch.getNumberOfElements() * (currentPage+1) - 5)
+        )
+        {
+            Toast.makeText(PerfilAmigoActivity.this, "atualizado", Toast.LENGTH_SHORT).show();
+            currentPage++;
+            carregarFotosPostagem();
+        }
     }
 }

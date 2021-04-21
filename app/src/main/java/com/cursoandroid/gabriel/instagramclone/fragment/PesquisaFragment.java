@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.Toast;
 
@@ -48,15 +49,13 @@ public class PesquisaFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-    private SearchView searchViewPesquisa;
-    private RecyclerView recyclerViewPesquisar;
 
-    private Retrofit retrofit;
     private UserServices userServices;
 
     private UserProfile currentUser;
+    private ProgressBar progressBar;
 
-    private List<UserProfile> listaUsuarios = new ArrayList<>();
+    private final List<UserProfile> listaUsuarios = new ArrayList<>();
     private AdapterPesquisa adapterPesquisa;
     private UserSearch userSearch;
 
@@ -111,22 +110,22 @@ public class PesquisaFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_pesquisa, container, false);
 
-        searchViewPesquisa = view.findViewById(R.id.searchViewPesquisa);
-        recyclerViewPesquisar = view.findViewById(R.id.recyclerViewPesquisa);
+        SearchView searchViewPesquisa = view.findViewById(R.id.searchViewPesquisa);
+        RecyclerView recyclerViewPesquisar = view.findViewById(R.id.recyclerViewPesquisa);
         recyclerViewPesquisar.setHasFixedSize(true);
         recyclerViewPesquisar.setLayoutManager(new LinearLayoutManager(activity));
+        progressBar = view.findViewById(R.id.progressBarSearch);
+        progressBar.setVisibility(View.GONE);
 
         configRetrofit();
         getCurrentUser();
 
         adapterPesquisa = new AdapterPesquisa(listaUsuarios, activity);
-
         recyclerViewPesquisar.setAdapter(adapterPesquisa);
 
         recyclerViewPesquisar.addOnItemTouchListener(new RecyclerItemClickListener(activity, recyclerViewPesquisar, new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                //Usuario usuario = listaUsuarios.get(position);
                 Intent i = new Intent(activity, PerfilAmigoActivity.class);
                 i.putExtra("user", listaUsuarios.get(position).getId());
                 startActivity(i);
@@ -148,6 +147,7 @@ public class PesquisaFragment extends Fragment {
             @Override
             public boolean onQueryTextSubmit(String text) {
                 pesquisarUsuarios(text);
+                progressBar.setVisibility(View.VISIBLE);
                 return true;
             }
 
@@ -167,13 +167,6 @@ public class PesquisaFragment extends Fragment {
             public void onResponse(Call<UserProfile> call, Response<UserProfile> response) {
                 if(response.isSuccessful()){
                     currentUser = response.body();
-                }else{
-                    try {
-                        JSONObject json = new JSONObject(response.errorBody().string());
-                        Dialog.dialogError(activity, json.getString("message"), json.getString("details"));
-                    } catch (Exception e) {
-                        Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
                 }
             }
             @Override
@@ -184,7 +177,7 @@ public class PesquisaFragment extends Fragment {
     }
 
     private void configRetrofit() {
-        retrofit = Configurators.retrofitConfigurator(activity);
+        Retrofit retrofit = Configurators.retrofitConfigurator(activity);
         userServices = retrofit.create(UserServices.class);
     }
 
@@ -202,24 +195,16 @@ public class PesquisaFragment extends Fragment {
                         if (!user.getId().equals(currentUser.getId())) listaUsuarios.add(user);
                     }
                     adapterPesquisa.notifyDataSetChanged();
-                }else{
-                    try {
-                        JSONObject json = new JSONObject(response.errorBody().string());
-                        Dialog.dialogError(activity, json.getString("message"), json.getString("details"));
-                    } catch (Exception e) {
-                        Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
                 }
+                progressBar.setVisibility(View.GONE);
 
             }
 
             @Override
             public void onFailure(Call<UserSearch> call, Throwable t) {
                 Toast.makeText(activity, "Erro ao fazer pesquisa. " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                progressBar.setVisibility(View.GONE);
             }
         });
-
-
-
     }
 }

@@ -12,9 +12,18 @@ public class PostSearch implements Serializable {
     private int totalPages;
     private int numberOfElements;
     private int number;
+    private int totalElements;
     private boolean last;
 
     public PostSearch() {
+    }
+
+    public int getTotalElements() {
+        return totalElements;
+    }
+
+    public void setTotalElements(int totalElements) {
+        this.totalElements = totalElements;
     }
 
     public List<Post> getContent() {

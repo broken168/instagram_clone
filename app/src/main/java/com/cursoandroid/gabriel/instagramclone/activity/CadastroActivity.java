@@ -102,14 +102,6 @@ public class CadastroActivity extends AppCompatActivity {
                     // Do your success stuff...
                     Toast.makeText(CadastroActivity.this, "Cadastro feito com sucesso", Toast.LENGTH_SHORT).show();
                     autoLogin(user);
-                } else {
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        JSONArray jsonArray = jObjError.getJSONArray("errors");
-                        Dialog.dialogError(CadastroActivity.this, jsonArray.getJSONObject(0).getString("message"), null);
-                    } catch (Exception e) {
-                        Toast.makeText(CadastroActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
                 }
                 dialog.dismiss();
             }
@@ -125,13 +117,6 @@ public class CadastroActivity extends AppCompatActivity {
                             if(!mySharedPreferences.getToken().equals("")) {
                                 finish();
                                 startActivity(new Intent(CadastroActivity.this, MainActivity.class));
-                            }
-                        } else {
-                            try {
-                                JSONObject json = new JSONObject(response.errorBody().string());
-                                Dialog.dialogError(CadastroActivity.this, json.getString("message"), json.getString("details"));
-                            } catch (Exception e) {
-                                Toast.makeText(CadastroActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
                             }
                         }
                     }

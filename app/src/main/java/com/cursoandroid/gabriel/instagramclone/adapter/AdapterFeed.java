@@ -79,7 +79,7 @@ public class AdapterFeed extends RecyclerView.Adapter<AdapterFeed.MyViewHolder> 
         holder.description.setText(post.getDescription());
 
         if(post.getLikes() != null) holder.likeNumber.setText("Curtidas: " + post.getLikes());
-        if(post.getLiked()) holder.likeButton.setLiked(true);
+        holder.likeButton.setLiked(post.getLiked());
         holder.likeButton.setOnLikeListener(new OnLikeListener() {
             @Override
             public void liked(LikeButton likeButton) {
@@ -122,12 +122,6 @@ public class AdapterFeed extends RecyclerView.Adapter<AdapterFeed.MyViewHolder> 
                         post.setLikes(post.getLikes() + 1);
                         holder.likeNumber.setText("Curtidas: " + post.getLikes());
                         likeButton.setLiked(true);
-                    }
-                    try {
-                        JSONObject json = new JSONObject(response.errorBody().string());
-                        Dialog.dialogError(activity, json.getString("message"), json.getString("details"));
-                    } catch (Exception e) {
-                        Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
             }

@@ -141,14 +141,6 @@ public class FiltroActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<UserProfile> call, Response<UserProfile> response) {
                 if(response.isSuccessful()) currentUser = response.body();
-                else{
-                    try{
-                        JSONObject json = new JSONObject(response.errorBody().string());
-                        Dialog.dialogError(FiltroActivity.this, json.getString("message"), json.getString("details"));
-                    }catch (Exception e){
-                        Toast.makeText(FiltroActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                }
                 dialogCurrentUser.dismiss();
             }
 
@@ -204,14 +196,6 @@ public class FiltroActivity extends AppCompatActivity {
                 public void onResponse(Call<Void> call, Response<Void> response) {
                     if(response.isSuccessful()){
                         createPost(response.headers().get("Location"));
-                    }else{
-                        try{
-                        JSONObject json = new JSONObject(response.errorBody().string());
-                        Dialog.dialogError(FiltroActivity.this, json.getString("message"), json.getString("details"));
-                        }catch (Exception e){
-                            Toast.makeText(FiltroActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-                        }
-                        dialog.dismiss();
                     }
                 }
 
@@ -234,15 +218,8 @@ public class FiltroActivity extends AppCompatActivity {
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
-                if(response.isSuccessful()) Toast.makeText(FiltroActivity.this, "Post publicado com sucesso", Toast.LENGTH_SHORT).show();
-                else {
-                    try {
-                        JSONObject json = new JSONObject(response.errorBody().string());
-                        Dialog.dialogError(FiltroActivity.this, json.getString("message"), json.getString("details"));
-                    }catch (Exception e){
-                        Toast.makeText(FiltroActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                }
+                if(response.isSuccessful())
+                    Toast.makeText(FiltroActivity.this, "Post publicado com sucesso", Toast.LENGTH_SHORT).show();
                 finish();
             }
             @Override
